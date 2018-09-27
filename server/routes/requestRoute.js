@@ -1,6 +1,8 @@
 const multer = require("multer");
 const path = require("path");
 const uuidv4 = require("uuid/v4");
+const script = require("../script/script")
+
 
 module.exports = app => {
   // configure storage
@@ -22,8 +24,7 @@ module.exports = app => {
   app.post("/api/request", upload.any(), function(req, res) {
     console.log(req.body);
 
-    res.send({ by: "buddy" });
-
     //run script
+    script.startScript();
   });
 };
