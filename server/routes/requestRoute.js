@@ -25,6 +25,6 @@ module.exports = app => {
     console.log(req.body);
 
     //run script
-    script.startScript();
+    script.startScript(req.body);
   });
 };
