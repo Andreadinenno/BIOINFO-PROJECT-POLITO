@@ -19,7 +19,7 @@ module.exports = app => {
   const upload = multer({ storage });
 
   //route
-  app.post("/api/request", upload.single("i"), function(req, res) {
+  app.post("/api/request", upload.any(), function(req, res) {
     console.log(req.body);
 
     res.send({ by: "buddy" });
