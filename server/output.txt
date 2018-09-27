@@ -1,0 +1,145 @@
+isomiR-SEA - isomiR-SEA: an RNA-Seq analysis tool for miRNAs/isomiRs expression level profiling and miRNA-mRNA interaction sites evaluation
+===========================================================================================================================================
+
+SYNOPSIS
+    isomiR-SEA ./isomir_sea <-ift inFileTags -ifm inFileMature> [-ofl
+    outFileLabel] [ -parameters]
+
+DESCRIPTION
+
+OPTIONS
+    -h, --help
+          Display the help message.
+    --version-check BOOL
+          Turn this option off to disable version update notifications of the
+          application. One of 1, ON, TRUE, T, YES, 0, OFF, FALSE, F, and NO.
+          Default: 1.
+    --version
+          Display version information.
+    -v, --verbose INTEGER
+          verbose(0) no outputs, verbose(1) Displays global statistics,
+          verbose(2) Displays extensive statistics for each batch of reads,
+          verbose(3) Debug output.
+
+  isomiR-SEA Alignment Options:
+    -dap, --dpAllignOnPremirs BOOL
+          Allign unmapped tag on premir One of 1, ON, TRUE, T, YES, 0, OFF,
+          FALSE, F, and NO.
+    -ald, --affineLinearDgs INTEGER
+          Chose the gap scheme affine(0) linear(1) or dynamic(2) to be used in
+          the alignment (default: affine(0)).
+    -go, --gapOpen DOUBLE
+          Gap open cost for the Smith-Waterman alignment
+    -ge, --gapExtend DOUBLE
+          Gap extend cost for the Smith-Waterman alignment
+    -ma, --match DOUBLE
+          Score of a match for the Smith-Waterman alignment
+    -mm, --mismatch DOUBLE
+          Score of a mismatch for the Smith-Waterman alignment
+    -gl, --globalLocal BOOL
+          Use the global local or global-Unconstrained algorithm (default:
+          global(0) - local(1)) One of 1, ON, TRUE, T, YES, 0, OFF, FALSE, F,
+          and NO.
+    -ut, --unTop BOOL
+          type used for the global-unconstrained alignment AlignConfig TTop
+          (default: top(false) One of 1, ON, TRUE, T, YES, 0, OFF, FALSE, F,
+          and NO.
+    -ul, --unLeft BOOL
+          type used for the global-unconstrained alignment AlignConfig TLeft
+          (default: left(false) One of 1, ON, TRUE, T, YES, 0, OFF, FALSE, F,
+          and NO.
+    -ur, --unRight BOOL
+          type used for the global-unconstrained alignment AlignConfig TRight
+          (default: right(false) One of 1, ON, TRUE, T, YES, 0, OFF, FALSE, F,
+          and NO.
+    -ud, --unDown BOOL
+          type used for the global-unconstrained alignment AlignConfig TDown
+          (default: down(false) One of 1, ON, TRUE, T, YES, 0, OFF, FALSE, F,
+          and NO.
+    -sc, --specieCodes STRING
+          Specie codes to be evaluated during the alignment at the same time
+    -msas, --minSizeAlnStp1 INTEGER
+          Minimum size of ungapped alignment, starting from the seed,
+          extending the alignment
+    -mas, --minAlignScore INTEGER
+          Minimum alignment score for considering a tag expression of a miR
+    -ss, --seedStart INTEGER
+          Start position of the seed
+    -se, --seedEnd INTEGER
+          End position of the seed
+    -mspt, --maxStartPosTag INTEGER
+          Max index in tag position for starting the seed alignment
+    -mst, --minSizeTag INTEGER
+          Minimum size of tag to be considered for the alignment
+    -tst, --thrSelectTags INTEGER
+          Threshold used to select select high quality multimapped tags
+    -mos, --mismatchsOutSeed INTEGER
+          Number of mismatches allowed between miRNA and tags tags
+    -mis, --mismatchsInSeed INTEGER
+          Number of mismatches allowed between miRNA seed and tags tags
+
+  Input Options:
+    -ift, --inFileTags INPUT_FILE
+          Name of input file storing Tags (full path or searched in the
+          current folder)
+    -ifm, --inFileMature INPUT_FILE
+          Name of input file storing mature/star miRs (if passed alone both
+          mature/star are acquired and will be tryed to discriminate the type
+          (full path or searched in the current folder)
+    -ifs, --inFileStar INPUT_FILE
+          Name of input file storing star miRs that if passed separately can
+          be readed and included in the mature structure (full path or
+          searched in the current folder) [OPTIONAL]
+    -ifg, --inFileGff INPUT_FILE
+          Name of input file storing GFF3 with miR/premiR annotated on ref
+          genome (full path or searched in the current folder) [OPTIONAL]
+    -tmg, --typeMirGff STRING
+          Type field of miRNA in GFF3 input file [OPTIONAL]
+    -ifb, --inFileBed INPUT_FILE
+          Name of input file storing BED with miR/premiR annotated on ref
+          genome (full path or searched in the current folder) [OPTIONAL]
+    -ifpe, --inFilePremir INPUT_FILE
+          Name of input file storing Pre-miRs (full path or searched in the
+          current folder) [OPTIONAL]
+    -ifpi, --inFilePrimir INPUT_FILE
+          Name of input file storing Pri-miRs (full path or searched in the
+          current folder) [OPTIONAL]
+    -dor, --dnaOrRna BOOL
+          If this parameter is True the conversion between DNA to RNA is
+          avoided One of 1, ON, TRUE, T, YES, 0, OFF, FALSE, F, and NO.
+    -umn, --unformMatureNames BOOL
+          Unformatted name of mature miRNAs (format is ORG-MIRNAME and
+          eventually Prologuos, 5p/3p, and * One of 1, ON, TRUE, T, YES, 0,
+          OFF, FALSE, F, and NO.
+
+  Output Options:
+    -ofl, --outFileLabel STRING
+          Name of common part of the output file (Defoult will be used the
+          last folder of the path storing the dataset
+    -of, --outFormats STRING
+          Formats of the output file (tab-gff, gtf sam and bam are available)
+    -pof, --pathOutFiles STRING
+          Path were to generate the folders storing output files (If empty
+          will be used the current folder)
+    -td, --tmpDir STRING
+          Temporary directory where to save intermediate files. Default: use
+          \tmp of OS.
+
+  miRNA database Info:
+    -dbn, --mirDbName STRING
+          Name of miR database
+    -dbv, --mirDbVersion STRING
+          Version of miR database
+    -dbw, --mirDbWeb STRING
+          Website of miR database
+
+  Performance Options:
+    -tl, --timeLimit INTEGER
+          Time limit for the program
+    -t, --threads INTEGER
+          Specify the number of threads to use. In range [1..2].
+
+VERSION
+    Last update: 2017
+    isomiR-SEA version: 2.0
+    SeqAn version: 2.4.0
