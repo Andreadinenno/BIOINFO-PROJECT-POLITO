@@ -10,7 +10,7 @@ class Header extends Component {
           </a>
           <ul id="nav-mobile" className="right hide-on-med-and-down">
             <li>
-              <a href="">
+              <a href="/documents/isomiR-SEA.pdf" download="isomiR-SEA.pdf">
                 Docs<i className="large material-icons left">link</i>
               </a>
             </li>

@@ -39,7 +39,6 @@ class Form extends Component {
   }
 
   handleChange(event) {
-    console.log(event.target.id);
     if (event.target.id === "r") {
       if (this.state[event.target.id] === "on") {
         this.setState({ [event.target.id]: "off" });
@@ -275,7 +274,7 @@ class Form extends Component {
                 <label
                   style={{
                     marginRight: "10px",
-                    fontSize: "20px",
+                    fontSize: "18px",
                     color: "#006064"
                   }}
                 >
@@ -299,7 +298,10 @@ class Form extends Component {
             <button
               type="submit"
               className="teal btn-flat left white-text"
-              style={{ marginLeft: "420px", marginTop: "50px" }}
+              style={{
+                marginLeft: "420px",
+                marginTop: "50px"
+              }}
             >
               <i className="material-icons left">done</i>
               Submit
