@@ -1,0 +1,408 @@
+return (
+  <div style={{ padding: "10px" }}>
+    <h1 />
+    <form
+      onSubmit={this.handleSubmit}
+      style={{
+        padding: "40px",
+        marginLeft: "20px",
+        marginRight: "20px",
+        borderRadius: "10px",
+        marginBottom: "60px",
+        backgroundColor: "#fff3e0",
+        textAlign: "center"
+      }}
+    >
+      <button
+        type="submit"
+        className="teal btn-flat left white-text"
+        style={{
+          marginLeft: "420px",
+          marginTop: "50px"
+        }}
+      >
+        <i className="material-icons left">done</i>
+        Submit
+      </button>
+      <button
+        type="reset"
+        className="red btn-flat right white-text"
+        style={{ marginRight: "420px", marginTop: "50px" }}
+      >
+        <i className="material-icons left">cancel</i>
+        Reset
+      </button>
+    </form>
+  </div>
+)
+
+handleChange(event) {
+  if (event.target.id === "r") {
+    if (this.state[event.target.id] === "on") {
+      this.setState({ [event.target.id]: "off" });
+    } else {
+      this.setState({ [event.target.id]: "on" });
+    }
+  } else if (event.target.id === "i") {
+    this.setState({ inputFile: event.target.files[0].name });
+    this.setState({ [event.target.id]: event.target.files[0] });
+  } else if (event.target.id === "m") {
+    this.setState({ refDbFile: event.target.files[0].name });
+    this.setState({ [event.target.id]: event.target.files[0] });
+  } else if (event.target.id === "t") {
+    this.setState({ tagsFile: event.target.files[0].name });
+    this.setState({ [event.target.id]: event.target.files[0] });
+  } else {
+    this.setState({ [event.target.id]: event.target.value });
+  }
+}
+
+validateForm(data) {
+  var keyToMaxValue = [];
+  var isValid = true;
+
+  //get locally max value for each input from alignmentParameters
+  for (var item in alignmentParameters) {
+    keyToMaxValue[alignmentParameters[item].id] =
+      alignmentParameters[item].max;
+  }
+
+  for (var key in data) {
+    if (key !== "response" && key !== "errors") {
+      if (data[key] === "") {
+        this.state.errors[key] = "Provide this value";
+        isValid = false;
+      } else if (data[key].length > keyToMaxValue[key]) {
+        this.state.errors[key] =
+          "The value has max length of  " + keyToMaxValue[key] + "characters";
+        isValid = false;
+      } else {
+        this.state.errors[key] = "";
+      }
+    }
+  }
+
+  if (isValid) return true;
+  else {
+    this.forceUpdate();
+    return false;
+  }
+}
+
+handleSubmit(event) {
+  var data = this.state;
+  if (!this.validateForm(data)) {
+    event.preventDefault();
+    return;
+  }
+
+  //data can be sent
+  const { i, r, s, l, ss, sb, se, b, h, m, t } = data;
+  let form = new FormData();
+  form.append("i", i);
+  form.append("m", m);
+  form.append("t", t);
+  form.append("r", r);
+  form.append("s", s);
+  form.append("l", l);
+  form.append("ss", ss);
+  form.append("sb", sb);
+  form.append("se", se);
+  form.append("b", b);
+  form.append("h", h);
+
+  //default values
+  form.append("o", "/"); //output folder path -> root
+
+  axios
+    .post("/api/request", form)
+    .then(result => {
+      this.setState({ response: "Processing.." });
+    })
+    .catch(err => {
+      this.setState({ response: "Error.." });
+    });
+
+  /*
+  fetch("/api/request", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ data })
+  })
+    .then(res => res.json())
+    .then(data => {
+      console.log(data);
+      this.setState({ response: "Processing.." });
+    })
+    .catch(err => console.log(err));*/
+
+  event.preventDefault();
+}
+
+renderAlignmentParameters() {
+  return _.map(alignmentParameters, field => {
+    return (
+      <div className="row" style={{ marginBottom: "0px" }}>
+        <div className="input-field col s12">
+          <input
+            placeholder={field.help}
+            id={field.id}
+            type={field.type}
+            className="validate"
+            onChange={this.handleChange}
+          />
+          <h6 style={{ color: "red" }}>{this.state.errors[field.id]}</h6>
+          <label
+            className="active"
+            style={{
+              color: "#006064",
+              fontSize: "20px",
+              marginBottom: "3px"
+            }}
+          >
+            {field.label}
+          </label>
+        </div>
+      </div>
+    );
+  });
+}
+
+renderFiles() {
+  return (
+    <div className="col s6">
+      <div
+        className="file-field input-field col s6"
+        style={{ width: "50%", marginLeft: "12px" }}
+      >
+        <div className="btn">
+          <span>Input folder</span>
+          <input
+            type="file"
+            id="i"
+            className="i"
+            name="i"
+            onChange={this.handleChange}
+          />
+        </div>
+        <div className="file-path-wrapper">
+          <input
+            className="file-path validate"
+            style={{ color: "red" }}
+            type="text"
+            placeholder={this.state.inputFile}
+          />
+        </div>
+      </div>
+
+      <div
+        className="file-field input-field col s12"
+        style={{ width: "50%", marginLeft: "12px" }}
+      >
+        <div className="btn">
+          <span>Reference database file</span>
+          <input
+            type="file"
+            id="m"
+            className="m"
+            name="m"
+            onChange={this.handleChange}
+          />
+        </div>
+        <div className="file-path-wrapper">
+          <input
+            className="file-path validate"
+            style={{ color: "red" }}
+            type="text"
+            placeholder={this.state.refDbFile}
+          />
+        </div>
+      </div>
+
+      <div
+        className="file-field input-field col s12"
+        style={{ width: "50%", marginLeft: "12px" }}
+      >
+        <div className="btn">
+          <span>Tags count file</span>
+          <input
+            type="file"
+            id="t"
+            className="t"
+            name="t"
+            onChange={this.handleChange}
+          />
+        </div>
+        <div className="file-path-wrapper">
+          <input
+            className="file-path validate"
+            style={{ color: "red" }}
+            type="text"
+            placeholder={this.state.tagsFile}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+/*alignmentParameters*/
+<form
+  onSubmit={this.handleSubmit}
+  style={{
+    padding: "20px",
+    marginLeft: "auto",
+    marginRight: "auto",
+    width: "70%",
+    borderRadius: "10px",
+    marginBottom: "60px",
+    backgroundColor: "#fff3e0",
+    textAlign: "center"
+  }}
+>
+  {this.manageRender()}
+  <button
+    type="submit"
+    className="teal btn-flat left white-text"
+    style={{
+      marginLeft: "420px",
+      marginTop: "50px"
+    }}
+  >
+    <i className="material-icons left">done</i>
+    Submit
+  </button>
+  <button
+    type="reset"
+    className="red btn-flat right white-text"
+    style={{ marginRight: "420px", marginTop: "50px" }}
+  >
+    <i className="material-icons left">cancel</i>
+    Reset
+  </button>
+</form>+
+
+/*SUBMIT FORM*/
+handleSubmit(event) {
+  //validate forms
+
+  this.setState({ submitted: true });
+
+  event.preventDefault();
+}
+
+/* CHANGE HANDLERS */
+checkboxChanged(event) {
+  let form = { ...this.state.form };
+  form[event.target.id] = !form[event.target.id]; //updating value
+  this.setState({ form });
+}
+
+textFieldChanged(event) {
+  let form = { ...this.state.form };
+  form[event.target.id] = event.target.value; //updating value
+  this.setState({ form });
+}
+
+selectChanged(event, id, selectedValue) {
+  let form = { ...this.state.form };
+  form[id] = selectedValue.value; //updating value
+  this.setState({ form });
+}
+
+/*RENDERERS*/
+renderTextField(field) {
+  return (
+    <div className="row" style={{ marginBottom: "0px", width: "50%" }}>
+      <div className="input-field col s12">
+        <input
+          placeholder={field.help}
+          id={field.id}
+          key={field.id}
+          type={field.type}
+          className="validate"
+          onChange={this.textFieldChanged}
+        />
+        <label
+          className="active"
+          style={{
+            color: "#006064",
+            fontSize: "15px",
+            marginBottom: "3px"
+          }}
+        >
+          {field.label}
+        </label>
+      </div>
+    </div>
+  );
+}
+
+renderBool(field) {
+  return (
+    <div className="row">
+      <div className="switch col s12">
+        <label
+          style={{
+            marginRight: "10px",
+            fontSize: "15px",
+            color: "#006064"
+          }}
+        >
+          {field.label}
+        </label>
+        <label
+          style={{
+            fontSize: "15px"
+          }}
+          key={field.id}
+        >
+          {field.falseValue}
+          <input
+            type="checkbox"
+            key={field.id}
+            id={field.id}
+            onChange={this.checkboxChanged}
+          />
+          <span className="lever" />
+          {field.trueValue}
+        </label>
+      </div>
+    </div>
+  );
+}
+
+renderSelection(field) {
+  const options = [];
+  for (var i in field.options) {
+    var object = { value: field.options[i], label: field.options[i] };
+    options.push(object);
+  }
+
+  const selectedOption = this.state[field.id];
+
+  return (
+    <div
+      style={{
+        width: "30%",
+        height: "80px",
+        marginLeft: "auto",
+        marginRight: "auto"
+      }}
+    >
+      <Select
+        value={selectedOption}
+        key={field.id}
+        onChange={this.selectChanged.bind(this, selectedOption, field.id)}
+        options={options}
+        id={field.id}
+        name={field.id}
+        placeholder={field.label}
+      />
+    </div>
+  );
+}

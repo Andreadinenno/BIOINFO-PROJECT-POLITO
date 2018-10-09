@@ -1,8 +1,6 @@
 import React, { Component } from "react";
 import Header from "./Header";
-import Footer from "./Footer";
-import Form from "./inputForm/Form";
-import AlignmentOptions from "./inputForm/AlignmentOptions";
+import InputForm from "./inputForm/InputForm";
 import { Route, BrowserRouter } from "react-router-dom";
 
 class App extends Component {
@@ -11,7 +9,7 @@ class App extends Component {
       <BrowserRouter>
         <div style={{ margin: "15px" }}>
           <Header />
-          <Route exact path="/" component={AlignmentOptions} />
+          <Route exact path="/" component={InputForm} />
         </div>
       </BrowserRouter>
     );
