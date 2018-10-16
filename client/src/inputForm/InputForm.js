@@ -1,18 +1,25 @@
 import React, { Component } from "react";
 import _ from "lodash";
-import alignmentParameters from "./parameters/alignmentParameters";
-import inputParams from "./parameters/inputParameters";
+import axios from "axios";
 import Select from "react-select";
+import OutputVisualization from "../OutputVisualization";
+import mandatoryParams from "./parameters/mandatoryParameters";
+import alignmentParams from "./parameters/alignmentParameters";
+import inputParams from "./parameters/inputParameters";
 import {
   Form,
   Button,
   Dropdown,
   Progress,
   Menu,
-  Label
+  Dimmer,
+  Checkbox,
+  Loader,
+  Segment
 } from "semantic-ui-react";
 
-let MAX_PARTS = 2;
+const parameterFiles = ["mandatoryParams", "alignmentParams", "inputParams"];
+//TODO cancellare i file caricati dopo la computazione
 
 class InputForm extends Component {
   constructor(props) {
@@ -20,9 +27,10 @@ class InputForm extends Component {
 
     this.state = {
       submitted: false,
-      progress: 1,
-      activeItem: "alignmentParams",
-      form: {}
+      showOutput: false,
+      activeItem: "mandatoryParams",
+      form: { v: "2" },
+      errors: {}
     };
 
     //bind handlers to context
@@ -31,46 +39,76 @@ class InputForm extends Component {
     this.selectChanged = this.selectChanged.bind(this);
     this.checkboxChanged = this.checkboxChanged.bind(this);
     this.fileChanged = this.fileChanged.bind(this);
-    this.goBack = this.goBack.bind(this);
     this.handleItemClick = this.handleItemClick.bind(this);
     this.uploadFile = this.uploadFile.bind(this);
   }
 
+  isFormValid() {
+    let errors = { ...this.state.errors };
+    var countErrors = 0;
+
+    //check that mandatory fields are set
+    mandatoryParams.forEach(field => {
+      if (!this.state.form[field.id]) {
+        errors[field.id] = true;
+        countErrors++;
+      } else {
+        errors[field.id] = false;
+      }
+    });
+
+    if (countErrors > 0) {
+      this.setState({ errors });
+      this.setState({ activeItem: "mandatoryParams" });
+      return false;
+    }
+    return true;
+  }
+
   /*SUBMIT FORM*/
   handleSubmit(event) {
-    //validate forms
-    console.log(this.state.form);
+    if (this.isFormValid()) {
+      //form can be submitted
+      let formData = new FormData();
 
-    if (this.state.progress === MAX_PARTS + 1)
+      //append the flag user has set
+      for (var key in this.state.form) {
+        formData.append(key, this.state.form[key]);
+      }
+
+      //append the files user has uploaded
+      for (var file in this.state.files) {
+        formData.append(key, this.state.files[file]);
+      }
+
+      //send form via HTTP POST request - server (node.js) is listening on that route
       this.setState({ submitted: true });
-    else this.setState({ progress: this.state.progress + 1 });
+      axios
+        .post("/api/request", formData)
+        .then(result => {
+          //stop the loader
+          this.setState({ submitted: false });
 
+          //make the component render the output
+          this.setState({ showOutput: true });
+        })
+        .catch(err => {
+          //TODO
+          this.setState({ response: "Error.." });
+        });
+    }
     event.preventDefault();
   }
 
-  goBack(event) {
-    if (this.state.progress > 1)
-      this.setState({ progress: this.state.progress - 1 });
-  }
-
+  //handle the tab click
   handleItemClick(clickedItem, event) {
-    let percentage;
-    switch (clickedItem) {
-      case "alignmentParams":
-        percentage = 1;
-        break;
-      case "dbParams":
-        percentage = 2;
-        break;
-    }
-
-    this.setState({ progress: percentage, activeItem: clickedItem });
+    this.setState({ activeItem: clickedItem });
   }
 
   /* CHANGE HANDLERS */
-  checkboxChanged(field, value, event) {
+  checkboxChanged(id, event) {
     let form = { ...this.state.form };
-    form[field.id] = value; //updating value
+    form[id] = !form[id]; //updating value
     this.setState({ form });
   }
 
@@ -88,9 +126,10 @@ class InputForm extends Component {
 
   fileChanged(field, event) {
     let form = { ...this.state.form };
-    form[field.id] = event.target.files[0].name; //updating value
+    form[field.id] = event.target.files[0].name; //update the file path
     this.setState({ form });
 
+    //upload the file
     let files = { ...this.state.files };
     files[field.id] = event.target.files[0];
     this.setState({ files });
@@ -103,10 +142,10 @@ class InputForm extends Component {
     return _.map(fields, field => {
       return (
         <Form.Input
-          required={!field.optional}
-          fluid
-          size={"small"}
-          label={`${field.label} - ${field.type}`}
+          error={this.state.errors[field.id]}
+          size="tiny"
+          style={{ padding: "0px" }}
+          label={field.label}
           placeholder={field.help}
           id={field.id}
           value={this.state.form[field.id]}
@@ -121,21 +160,12 @@ class InputForm extends Component {
   renderCheckbox(fields) {
     return _.map(fields, field => {
       return (
-        <Form.Group inline>
-          <label>{field.label}</label>
-          <Form.Radio
-            label={field.falseValue}
-            value={field.falseValue}
-            checked={this.state.form[field.id] === 0}
-            onChange={this.checkboxChanged.bind(this, field, 0)}
-          />
-          <Form.Radio
-            label={field.trueValue}
-            value={field.trueValue}
-            checked={this.state.form[field.id] === 1}
-            onChange={this.checkboxChanged.bind(this, field, 1)}
-          />
-        </Form.Group>
+        <Checkbox
+          label={field.label}
+          style={{ marginRight: "10px", marginBottom: "20px" }}
+          checked={this.state.form[field.id]}
+          onChange={this.checkboxChanged.bind(this, field.id)}
+        />
       );
     });
   }
@@ -156,13 +186,15 @@ class InputForm extends Component {
       }
 
       return (
-        <span style={{ fontSize: "16px" }}>
+        <span style={{ fontSize: "16px", marginRight: "20px" }}>
           {field.label}
           {":   "}
           <Dropdown
             inline
+            error={this.state.errors[field.id]}
             options={options}
             id={field.id}
+            value={this.state.form[field.id]}
             defaultValue={options[0].value}
             onChange={this.selectChanged.bind(field.id)}
           />
@@ -175,6 +207,8 @@ class InputForm extends Component {
     return _.map(fields, field => {
       return (
         <Form.Input
+          label={field.label}
+          error={this.state.errors[field.id]}
           action={
             <div
               className="file-field input-field col s6"
@@ -196,6 +230,19 @@ class InputForm extends Component {
           readOnly
           onChange={this.fileChanged.bind(this, field)}
           placeholder={this.state.form[field.id] || field.placeholder}
+        />
+      );
+    });
+  }
+
+  renderMenu() {
+    return _.map(parameterFiles, file => {
+      return (
+        <Menu.Item
+          name={file}
+          key={file}
+          active={this.state.activeItem === file}
+          onClick={this.handleItemClick.bind(this, file)}
         />
       );
     });
@@ -226,63 +273,69 @@ class InputForm extends Component {
       }
     });
 
-    if (textFields.length > 0)
-      returnForm.push(this.renderTextField(textFields));
-
-    if (boolFields.length > 0) returnForm.push(this.renderCheckbox(boolFields));
-
     if (selectionFields.length > 0)
       returnForm.push(this.renderSelection(selectionFields));
 
+    if (boolFields.length > 0) returnForm.push(this.renderCheckbox(boolFields));
+
+    if (textFields.length > 0)
+      returnForm.push(this.renderTextField(textFields));
+
     if (fileFields.length > 0) returnForm.push(this.renderFile(fileFields));
 
+    //return the entire form to render on screen
     return returnForm;
   }
 
   /*COMPONENT RENDER*/
   render() {
-    var params, header, percentage;
-    percentage = (this.state.progress / MAX_PARTS) * 100;
-    var activeItem = this.state.activeItem;
-    switch (this.state.progress) {
-      case 2:
-        params = inputParams;
-        header = "Input parameters";
+    //select the file with the parameters to render on the fly
+    var paramsToRender;
+    switch (this.state.activeItem) {
+      case "alignmentParams":
+        paramsToRender = alignmentParams;
+        break;
+      case "inputParams":
+        paramsToRender = inputParams;
         break;
       default:
-        params = alignmentParameters;
-        header = "Alignment parameters";
+        paramsToRender = mandatoryParams;
         break;
     }
 
-    return (
-      <div style={{ padding: "10px" }}>
-        <Progress percent={percentage} style={{ height: "10px" }} indicating />
-        <Menu tabular>
-          <Menu.Item
-            name="Alignment Parameters"
-            active={activeItem === "alignmentParams"}
-            onClick={this.handleItemClick.bind(this, "alignmentParams")}
-          />
-          <Menu.Item
-            name="Database Parameters"
-            active={activeItem === "dbParams"}
-            onClick={this.handleItemClick.bind(this, "dbParams")}
-          />
-        </Menu>
-        <Form
-          unstackable
-          size="small"
-          style={{
-            alignContent: "center",
-            width: "50%",
-            margin: "10px auto"
-          }}
-        >
-          {this.manageRender(params)}
-        </Form>
-      </div>
-    );
+    if (!this.state.showOutput) {
+      return (
+        <div style={{ padding: "10px", marginTop: "20px" }} key="container">
+          <Button onClick={this.handleSubmit} color="teal" size="big" primary>
+            RUN
+          </Button>
+          <Segment key="loader">
+            <Dimmer inverted active={this.state.submitted}>
+              <Loader size="medium" indeterminate>
+                Running the computation
+              </Loader>
+            </Dimmer>
+            <Menu tabular size="large" style={{ marginBottom: "35px" }}>
+              {this.renderMenu()}
+            </Menu>
+            <Form
+              key="label_form"
+              unstackable
+              size="small"
+              style={{
+                width: "100%"
+              }}
+            >
+              {this.manageRender(paramsToRender)}
+            </Form>
+          </Segment>
+        </div>
+      );
+    } else {
+      //render the output visualization with the form passed as props
+      //the OutputVisualization component will get the data as props.data
+      return <OutputVisualization data={this.state.form} />;
+    }
   }
 }
 

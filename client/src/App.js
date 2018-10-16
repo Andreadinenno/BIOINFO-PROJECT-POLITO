@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import Header from "./Header";
+import Homepage from "./Homepage";
+import OutputVisualization from "./OutputVisualization";
 import InputForm from "./inputForm/InputForm";
 import { Route, BrowserRouter } from "react-router-dom";
 
@@ -9,12 +11,13 @@ class App extends Component {
       <BrowserRouter>
         <div style={{ margin: "15px" }}>
           <Header />
-          <Route exact path="/" component={InputForm} />
+          <Route exact path="/" component={Homepage} />
+          <Route exact path="/new" component={InputForm} />
+          <Route exact path="/output" component={OutputVisualization} />
         </div>
       </BrowserRouter>
     );
   }
 }
 
-//actions are passed to the component as props
 export default App;
