@@ -30,8 +30,6 @@ module.exports =  app  => {
   app.post("/api/request", upload.any(), function(req, res) {
     console.log(req.body);
 
-    res.send({ ok: "buddy" });
-
     //run script
     script.startScript(req.body,res)
     //console.log(data);
