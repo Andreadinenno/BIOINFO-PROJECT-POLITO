@@ -4,7 +4,7 @@ const uuidv4 = require("uuid/v4");
 const script = require("../script/script")
 
 
-module.exports = app => {
+module.exports =  app  => {
   // configure storage
   const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -25,6 +25,9 @@ module.exports = app => {
     console.log(req.body);
 
     //run script
-    script.startScript(req.body);
+    script.startScript(req.body,res)
+    //console.log(data);
+     //res.send(data);
+
   });
 };
