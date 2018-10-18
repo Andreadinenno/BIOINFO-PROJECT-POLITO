@@ -12,14 +12,21 @@
     "materialize-css": "^1.0.0-rc.2",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
+    "react-md-file": "^1.1.0",
+    "react-pdf": "^3.0.5",
     "react-router-dom": "^4.3.1",
     "react-scripts": "1.1.4",
-    "request": "^2.88.0"
+    "react-select": "^2.0.0",
+    "request": "^2.88.0",
+    "semantic-ui-react": "^0.82.5"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "file-loader": "^2.0.0"
   }
 }

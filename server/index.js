@@ -6,7 +6,7 @@ const uuidv4 = require("uuid/v4");
 
 const app = express(); //create an express application
 
-app.use(bodyParser.json()); //body parser for incoming request as stripe
+app.use(bodyParser.json()); //body parser for incoming request
 
 require("./routes/requestRoute.js")(app); //will call immediately the route file function passing app as argument
 
