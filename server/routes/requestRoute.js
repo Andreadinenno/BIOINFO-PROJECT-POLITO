@@ -3,23 +3,19 @@ const path = require("path");
 const uuidv4 = require("uuid/v4");
 const md5 = require("md5");
 const mkdirp = require("mkdirp");
-//const script = require("../script/script");
+const script = require("../script/script");
 
-module.exports =  app  => {
+module.exports = app => {
   // configure storage
   const storage = multer.diskStorage({
     destination: (req, file, cb) => {
       //directory -> root is server ->
-      const sessionFolderName = md5(req);
-      mkdirp(`./uploads/${sessionFolderName}`, function(err) {
-        // path exists unless there was an error
-      });
-
-      cb(null, `./uploads/${sessionFolderName}`);
+      //sessionFolderName = md5(req);
+      //mkdirp(`./script/uploads/${sessionFolderName}`, function(err) {
+      // path exists unless there was an error
+      cb(null, `./script`);
     },
     filename: (req, file, cb) => {
-      //to create a random filename
-      //const newFilename = `${uuidv4()}${path.extname(file.originalname)}`;
       cb(null, file.originalname);
     }
   });
@@ -27,13 +23,12 @@ module.exports =  app  => {
   const upload = multer({ storage });
 
   //route
-  app.post("/api/request", upload.any(), function(req, res) {
+  app.post("/api/request", upload.any(), async function(req, res) {
     console.log(req.body);
 
     //run script
-    script.startScript(req.body,res)
+    data = await script.startScript(req.body);
     //console.log(data);
-     //res.send(data);
-
+    //res.send(data);
   });
 };

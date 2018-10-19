@@ -1,3 +1,5 @@
+//types are file - text - number - switch (for checkboxes) -
+//radio (for selection) -> all options in a list with key options
 export default [
   {
     label: "Input file storing Tags",
@@ -8,10 +10,5 @@ export default [
     label: " Name of input file storing mature/star miRs",
     id: "ifm",
     type: "file"
-  },
-  {
-    label: "Type field of miRNA in GFF3 input file",
-    id: "tmg",
-    type: "text"
   }
 ];

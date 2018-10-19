@@ -6,6 +6,11 @@ import OutputVisualization from "../OutputVisualization";
 import mandatoryParams from "./parameters/mandatoryParameters";
 import alignmentParams from "./parameters/alignmentParameters";
 import inputParams from "./parameters/inputParameters";
+import miRNAdbParams from "./parameters/miRNAdbParameters";
+import performanceParams from "./parameters/performanceParameters";
+import Popup from "react-popup";
+import fs from "fs";
+
 import {
   Form,
   Button,
@@ -15,12 +20,21 @@ import {
   Dimmer,
   Checkbox,
   Loader,
-  Segment
+  Segment,
+  Header,
+  Icon
 } from "semantic-ui-react";
 
-const parameterFiles = ["mandatoryParams", "alignmentParams", "inputParams"];
-//TODO cancellare i file caricati dopo la computazione
+//they must have the same name of the imported file
+const parameterFiles = [
+  "mandatoryParams",
+  "alignmentParams",
+  "inputParams",
+  "miRNAdbParams",
+  "performanceParams"
+];
 
+let uploadsPath;
 class InputForm extends Component {
   constructor(props) {
     super(props);
@@ -29,7 +43,7 @@ class InputForm extends Component {
       submitted: false,
       showOutput: false,
       activeItem: "mandatoryParams",
-      form: { v: "2" },
+      form: { v: "2", sc: "hsa" },
       errors: {}
     };
 
@@ -40,7 +54,12 @@ class InputForm extends Component {
     this.checkboxChanged = this.checkboxChanged.bind(this);
     this.fileChanged = this.fileChanged.bind(this);
     this.handleItemClick = this.handleItemClick.bind(this);
-    this.uploadFile = this.uploadFile.bind(this);
+    this.helpPopup = this.helpPopup.bind(this);
+  }
+
+  helpPopup(message, event) {
+    console.log(message);
+    window.alert(message);
   }
 
   isFormValid() {
@@ -89,6 +108,7 @@ class InputForm extends Component {
           //stop the loader
           this.setState({ submitted: false });
 
+          //fs.writeFileSync("res.json", JSON.stringify(result));
           //make the component render the output
           this.setState({ showOutput: true });
         })
@@ -102,6 +122,7 @@ class InputForm extends Component {
 
   //handle the tab click
   handleItemClick(clickedItem, event) {
+    console.log(clickedItem);
     this.setState({ activeItem: clickedItem });
   }
 
@@ -135,9 +156,7 @@ class InputForm extends Component {
     this.setState({ files });
   }
 
-  uploadFile(field, event) {}
-
-  /*RENDERERS*/
+  /*HTML ELEMENTS RENDERERS*/
   renderTextField(fields) {
     return _.map(fields, field => {
       return (
@@ -151,6 +170,7 @@ class InputForm extends Component {
           value={this.state.form[field.id]}
           key={field.id}
           type={field.type}
+          step="0.01"
           onChange={this.textFieldChanged.bind(field.id)}
         />
       );
@@ -160,12 +180,19 @@ class InputForm extends Component {
   renderCheckbox(fields) {
     return _.map(fields, field => {
       return (
-        <Checkbox
-          label={field.label}
-          style={{ marginRight: "10px", marginBottom: "20px" }}
-          checked={this.state.form[field.id]}
-          onChange={this.checkboxChanged.bind(this, field.id)}
-        />
+        <span>
+          <Checkbox
+            label={field.label}
+            style={{ marginRight: "5px", marginBottom: "20px" }}
+            checked={this.state.form[field.id]}
+            onChange={this.checkboxChanged.bind(this, field.id)}
+          />
+          <Icon
+            name="question circle"
+            style={{ marginRight: "15px", marginBottom: "20px" }}
+            onClick={this.helpPopup.bind(this, field.help)}
+          />
+        </span>
       );
     });
   }
@@ -197,6 +224,11 @@ class InputForm extends Component {
             value={this.state.form[field.id]}
             defaultValue={options[0].value}
             onChange={this.selectChanged.bind(field.id)}
+          />
+          <Icon
+            name="question circle"
+            style={{ marginRight: "15px", marginBottom: "20px" }}
+            onClick={this.helpPopup.bind(this, field.help)}
           />
         </span>
       );
@@ -237,6 +269,7 @@ class InputForm extends Component {
 
   renderMenu() {
     return _.map(parameterFiles, file => {
+      console.log(file);
       return (
         <Menu.Item
           name={file}
@@ -248,7 +281,7 @@ class InputForm extends Component {
     });
   }
 
-  /* DISPATCHER RENDERER */
+  /* DISPATCHER */
   manageRender(params) {
     let boolFields = [];
     let selectionFields = [];
@@ -287,7 +320,7 @@ class InputForm extends Component {
     return returnForm;
   }
 
-  /*COMPONENT RENDER*/
+  /*COMPONENT RENDER METHOD*/
   render() {
     //select the file with the parameters to render on the fly
     var paramsToRender;
@@ -298,6 +331,12 @@ class InputForm extends Component {
       case "inputParams":
         paramsToRender = inputParams;
         break;
+      case "miRNAdbParams":
+        paramsToRender = miRNAdbParams;
+        break;
+      case "performanceParams":
+        paramsToRender = performanceParams;
+        break;
       default:
         paramsToRender = mandatoryParams;
         break;
@@ -306,9 +345,22 @@ class InputForm extends Component {
     if (!this.state.showOutput) {
       return (
         <div style={{ padding: "10px", marginTop: "20px" }} key="container">
-          <Button onClick={this.handleSubmit} color="teal" size="big" primary>
-            RUN
-          </Button>
+          <div>
+            <Header
+              as="h4"
+              style={{
+                width: "auto",
+                marginRight: "20px",
+                display: "inline-block"
+              }}
+            >
+              The tool can be run simply by setting mandatory parameters. All
+              the others are optional
+            </Header>
+            <Button onClick={this.handleSubmit} color="teal" size="big" primary>
+              RUN
+            </Button>
+          </div>
           <Segment key="loader">
             <Dimmer inverted active={this.state.submitted}>
               <Loader size="medium" indeterminate>
