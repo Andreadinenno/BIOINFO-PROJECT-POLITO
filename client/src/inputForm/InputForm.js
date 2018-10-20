@@ -6,7 +6,7 @@ import OutputVisualization from "../OutputVisualization";
 import mandatoryParams from "./parameters/mandatoryParameters";
 import alignmentParams from "./parameters/alignmentParameters";
 import inputParams from "./parameters/inputParameters";
-import miRNAdbParams from "./parameters/miRNAdbParameters";
+import databaseParams from "./parameters/miRNAdbParameters";
 import performanceParams from "./parameters/performanceParameters";
 import Popup from "react-popup";
 import fs from "fs";
@@ -30,7 +30,7 @@ const parameterFiles = [
   "mandatoryParams",
   "alignmentParams",
   "inputParams",
-  "miRNAdbParams",
+  "databaseParams",
   "performanceParams"
 ];
 
@@ -270,9 +270,10 @@ class InputForm extends Component {
   renderMenu() {
     return _.map(parameterFiles, file => {
       console.log(file);
+      var name = file.split("params");
       return (
         <Menu.Item
-          name={file}
+          name={name}
           key={file}
           active={this.state.activeItem === file}
           onClick={this.handleItemClick.bind(this, file)}
@@ -331,8 +332,8 @@ class InputForm extends Component {
       case "inputParams":
         paramsToRender = inputParams;
         break;
-      case "miRNAdbParams":
-        paramsToRender = miRNAdbParams;
+      case "databaseParams":
+        paramsToRender = databaseParams;
         break;
       case "performanceParams":
         paramsToRender = performanceParams;
