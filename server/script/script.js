@@ -2,42 +2,43 @@ const exec = require("child_process").exec;
 const fs = require("fs");
 const readline = require("readline");
 const path = require("path");
-//const xlsx = require("xlsx");
+const xlsx = require("xlsx");
 
-const startScript = options => {
-  /*@ANDRE-TANCHIA ho passato l'oggetto res a startScript ma non è elegante come cosa,
-      dovreste cambiare requestedRoute.js e far si che il modulo sia async in maniera
-      da poter utilizzare await ed attendere l'elaborazione del file altrimenti
-      per com'è fatto adesso manda risposta vuota*/
+const startScript = async options => {
+  return new Promise((resolve, reject) => {
+    //create command string
+    let root = path.resolve(__dirname); // /server/script
+    let cmd = "./isomir_sea";
 
-  //create command string
-  let cmd = "./script/isomir_sea";
-  for (var key in options) {
-    cmd = cmd + " -" + key + " " + options[key];
-  }
-
-  let data;
-
-  child = exec(cmd, async (error, stdout, stderr) => {
-    if (error !== null) {
-      console.log("exec error: " + error);
-      return;
+    for (var key in options) {
+      cmd = cmd + " -" + key + " " + options[key];
     }
-    //filename
-    let dir = "./script/" + fileName.slice(0, -4);
 
-    data = await processData(dir);
+    let data;
+    //the output directory is generated from the tag file name without the .txt
+    let outputDir = root +  "/" + options['ift'].slice(0, -4);
+
+    //run isomir sea - asynchronous operation
+    child = exec(cmd, {cwd: root}, async (error, stdout, stderr) => {
+      if (error !== null) {
+        console.log("exec error: " + error);
+        reject();
+      }
+
+      data = await processData(outputDir);
+      resolve(data);
+    });
   });
-
-  return data;
 };
 
 const processData = async dir => {
   return new Promise((resolve, reject) => {
-    getAlligmentInfo(dir).then(() =>
+    getAlligmentInfo(dir).then(lines =>
       getAllignmentData(dir).then(data => {
         deleteFolderRecursive(dir);
-        resolve(data);
+
+        var returnData = {"log": lines, "alig": data};
+        resolve(returnData);
       })
     );
   });
@@ -48,8 +49,33 @@ const getAllignmentData = async dir => {
     try {
       const workbook = xlsx.readFile(dir + "/tagMir-all.tab");
       const sheet_name_list = workbook.SheetNames;
+      const jsonSheet = xlsx.utils.sheet_to_json(workbook.Sheets[sheet_name_list]);
 
-      resolve(xlsx.utils.sheet_to_json(workbook.Sheets[sheet_name_list]));
+      //filter the entire table with relevant fields
+      const returnObject = {};
+      for(var i=0; i<jsonSheet.length; i++){
+        const values = [];
+        values.push(jsonSheet[i]['MIM']);
+        values.push(jsonSheet[i]['TS']);
+        values.push(jsonSheet[i]['TC']);
+        values.push(jsonSheet[i]['MS']);
+        values.push(jsonSheet[i]['AS']);
+        values.push(jsonSheet[i]['IEX']);
+        values.push(jsonSheet[i]['I5P']);
+        values.push(jsonSheet[i]['IMS']);
+        values.push(jsonSheet[i]['ISN']);
+        values.push(jsonSheet[i]['I3P']);
+        values.push(jsonSheet[i]['INS']);
+        values.push(jsonSheet[i]['IOS']);
+        values.push(jsonSheet[i]['ISS']);
+        values.push(jsonSheet[i]['IPS']);
+        values.push(jsonSheet[i]['ICS']);
+        values.push(jsonSheet[i]['MSD']);
+
+        returnObject[i] = values;
+      }
+
+      resolve(returnObject);
     } catch (e) {
       console.log(e);
       reject(e);
@@ -63,16 +89,17 @@ const getAlligmentInfo = async dir => {
       input: fs.createReadStream(dir + "/align.log")
     });
 
-    let lines = [];
+    let returnLogInfo = {};
+    let numLine = 0;
     fileInterface.on("line", line => {
-      lines.push(line);
-      console.log(line);
+      numLine ++ ;
+      //saving from the 97th line
+      if(numLine > 97)
+        returnLogInfo[numLine - 97] =  line.split("=")[1]
     });
 
     fileInterface.on("close", () => {
-      //here i have to take the infomations about the alignment
-      //[file interface.lenght , file interface.lenght --1]
-      resolve();
+      resolve(returnLogInfo);
     });
   });
 };

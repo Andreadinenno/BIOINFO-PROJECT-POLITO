@@ -106,6 +106,7 @@ class InputForm extends Component {
         .post("/api/request", formData)
         .then(result => {
           //stop the loader
+          console.log(result);
           this.setState({ submitted: false });
 
           //fs.writeFileSync("res.json", JSON.stringify(result));
@@ -269,7 +270,6 @@ class InputForm extends Component {
 
   renderMenu() {
     return _.map(parameterFiles, file => {
-      console.log(file);
       var name = file.split("params");
       return (
         <Menu.Item

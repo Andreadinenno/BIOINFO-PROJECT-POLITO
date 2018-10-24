@@ -29,6 +29,6 @@ module.exports = app => {
     //run script
     data = await script.startScript(req.body);
     //console.log(data);
-    //res.send(data);
+    res.send(data);
   });
 };
