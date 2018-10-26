@@ -10,9 +10,6 @@ module.exports = app => {
   const storage = multer.diskStorage({
     destination: (req, file, cb) => {
       //directory -> root is server ->
-      //sessionFolderName = md5(req);
-      //mkdirp(`./script/uploads/${sessionFolderName}`, function(err) {
-      // path exists unless there was an error
       cb(null, `./script`);
     },
     filename: (req, file, cb) => {
@@ -27,8 +24,19 @@ module.exports = app => {
     console.log(req.body);
 
     //run script
-    data = await script.startScript(req.body);
-    //console.log(data);
-    res.send(data);
+    /*try{
+      data = await script.startScript(req.body);
+      //console.log(data);
+      res.send(data);
+    }catch(err){
+      res.send(err);
+    }*/
+    try{
+      data = await script.startScript(req.body);
+      res.send(data);
+    } catch(err){
+      res.status(404).send("Oh uh, something went wrong");
+    }
+
   });
 };

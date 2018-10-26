@@ -45,7 +45,8 @@ class InputForm extends Component {
       activeItem: "mandatoryParams",
       form: { v: "2", sc: "hsa" },
       errors: {},
-      outputData: {}
+      outputData: {},
+      response: ""
     };
 
     //bind handlers to context
@@ -102,21 +103,18 @@ class InputForm extends Component {
       }
 
       //send form via HTTP POST request - server (node.js) is listening on that route
-      this.setState({ submitted: true });
+      this.setState({ submitted: true, response: "" });
       axios
         .post("/api/request", formData)
         .then(result => {
           //stop the loader
-          this.setState({ submitted: false });
-
-          //fs.writeFileSync("res.json", JSON.stringify(result));
           //make the component render the output
-          this.setState({outputData: result});
-          this.setState({ showOutput: true });
+          //pass the data down to plot component
+          this.setState({ submitted: false, outputData: result, showOutput: true });
+
         })
         .catch(err => {
-          //TODO
-          this.setState({ response: "Error.." });
+          this.setState({ submitted: false, response: err.message });
         });
     }
     event.preventDefault();
@@ -359,9 +357,22 @@ class InputForm extends Component {
               The tool can be run simply by setting mandatory parameters. All
               the others are optional
             </Header>
+
             <Button onClick={this.handleSubmit} color="teal" size="big" primary>
               RUN
             </Button>
+            <br />
+            <Header
+              as="h3"
+              style={{
+                width: "auto",
+                marginRight: "20px",
+                display: "inline-block",
+                color: "red"
+              }}
+            >
+              {this.state.response}
+            </Header>
           </div>
           <Segment key="loader">
             <Dimmer inverted active={this.state.submitted}>

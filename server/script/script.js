@@ -25,14 +25,37 @@ const startScript = async options => {
         reject();
       }
 
-      data = await processData(outputDir);
-      resolve(data);
+      try{
+        data = await processData(outputDir);
+        console.log("5");
+        resolve(data);
+      } catch (err){
+        console.log("6");
+        reject(err);
+      }
     });
   });
 };
 
 const processData = async dir => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
+    try{
+      var lines = await getAlligmentInfo(dir);
+
+      try{
+        var alig = await getAllignmentData(dir);
+        deleteFolderRecursive(dir);
+
+        var returnData= {"log": lines, "alig": alig};
+        resolve(returnData);
+
+      }catch(err){
+        areject(err);
+      }
+    }catch(err){
+      reject(err);
+    }
+    /*
     getAlligmentInfo(dir).then(lines =>
       getAllignmentData(dir).then(data => {
         deleteFolderRecursive(dir);
@@ -40,9 +63,9 @@ const processData = async dir => {
         var returnData = {"log": lines, "alig": data};
         resolve(returnData);
       })
-    );
+    ) */
   });
-};
+}
 
 const getAllignmentData = async dir => {
   return new Promise((resolve, reject) => {
@@ -77,7 +100,7 @@ const getAllignmentData = async dir => {
 
       resolve(returnObject);
     } catch (e) {
-      console.log(e);
+
       reject(e);
     }
   });
@@ -85,22 +108,27 @@ const getAllignmentData = async dir => {
 
 const getAlligmentInfo = async dir => {
   return new Promise((resolve, reject) => {
-    let fileInterface = readline.createInterface({
-      input: fs.createReadStream(dir + "/align.log")
-    });
+    try{
 
-    let returnLogInfo = {};
-    let numLine = 0;
-    fileInterface.on("line", line => {
-      numLine ++ ;
-      //saving from the 97th line
-      if(numLine > 97)
-        returnLogInfo[numLine - 97] =  line.split("=")[1]
-    });
+      let fileInterface = readline.createInterface({
+        input: fs.createReadStream(dir + "/align.log")
+      });
 
-    fileInterface.on("close", () => {
-      resolve(returnLogInfo);
-    });
+      let returnLogInfo = {};
+      let numLine = 0;
+      fileInterface.on("line", line => {
+        numLine ++ ;
+        //saving from the 97th line
+        if(numLine > 97)
+          returnLogInfo[numLine - 97] =  line.split("=")[1]
+      });
+
+      fileInterface.on("close", () => {
+        resolve(returnLogInfo);
+      });
+    }catch(err){
+      reject(err);
+    }
   });
 };
 
