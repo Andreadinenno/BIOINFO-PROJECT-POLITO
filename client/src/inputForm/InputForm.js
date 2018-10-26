@@ -44,7 +44,8 @@ class InputForm extends Component {
       showOutput: false,
       activeItem: "mandatoryParams",
       form: { v: "2", sc: "hsa" },
-      errors: {}
+      errors: {},
+      outputData: {}
     };
 
     //bind handlers to context
@@ -106,11 +107,11 @@ class InputForm extends Component {
         .post("/api/request", formData)
         .then(result => {
           //stop the loader
-          console.log(result);
           this.setState({ submitted: false });
 
           //fs.writeFileSync("res.json", JSON.stringify(result));
           //make the component render the output
+          this.setState({outputData: result});
           this.setState({ showOutput: true });
         })
         .catch(err => {
@@ -387,7 +388,7 @@ class InputForm extends Component {
     } else {
       //render the output visualization with the form passed as props
       //the OutputVisualization component will get the data as props.data
-      return <OutputVisualization data={this.state.form} />;
+      return <OutputVisualization data={this.state.outputData} />;
     }
   }
 }
