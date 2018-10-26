@@ -16,20 +16,20 @@ const startScript = async options => {
 
     let data;
     //the output directory is generated from the tag file name without the .txt
-    let outputDir = root +  "/" + options['ift'].slice(0, -4);
+    let outputDir = root + "/" + options["ift"].slice(0, -4);
 
     //run isomir sea - asynchronous operation
-    child = exec(cmd, {cwd: root}, async (error, stdout, stderr) => {
+    child = exec(cmd, { cwd: root }, async (error, stdout, stderr) => {
       if (error !== null) {
         console.log("exec error: " + error);
         reject();
       }
 
-      try{
+      try {
         data = await processData(outputDir);
         console.log("5");
         resolve(data);
-      } catch (err){
+      } catch (err) {
         console.log("6");
         reject(err);
       }
@@ -39,20 +39,19 @@ const startScript = async options => {
 
 const processData = async dir => {
   return new Promise(async (resolve, reject) => {
-    try{
+    try {
       var lines = await getAlligmentInfo(dir);
 
-      try{
+      try {
         var alig = await getAllignmentData(dir);
         deleteFolderRecursive(dir);
 
-        var returnData= {"log": lines, "alig": alig};
+        var returnData = { log: lines, alig: alig };
         resolve(returnData);
-
-      }catch(err){
-        areject(err);
+      } catch (err) {
+        reject(err);
       }
-    }catch(err){
+    } catch (err) {
       reject(err);
     }
     /*
@@ -65,42 +64,43 @@ const processData = async dir => {
       })
     ) */
   });
-}
+};
 
 const getAllignmentData = async dir => {
   return new Promise((resolve, reject) => {
     try {
       const workbook = xlsx.readFile(dir + "/tagMir-all.tab");
       const sheet_name_list = workbook.SheetNames;
-      const jsonSheet = xlsx.utils.sheet_to_json(workbook.Sheets[sheet_name_list]);
+      const jsonSheet = xlsx.utils.sheet_to_json(
+        workbook.Sheets[sheet_name_list]
+      );
 
       //filter the entire table with relevant fields
       const returnObject = {};
-      for(var i=0; i<jsonSheet.length; i++){
+      for (var i = 0; i < jsonSheet.length; i++) {
         const values = [];
-        values.push(jsonSheet[i]['MIM']);
-        values.push(jsonSheet[i]['TS']);
-        values.push(jsonSheet[i]['TC']);
-        values.push(jsonSheet[i]['MS']);
-        values.push(jsonSheet[i]['AS']);
-        values.push(jsonSheet[i]['IEX']);
-        values.push(jsonSheet[i]['I5P']);
-        values.push(jsonSheet[i]['IMS']);
-        values.push(jsonSheet[i]['ISN']);
-        values.push(jsonSheet[i]['I3P']);
-        values.push(jsonSheet[i]['INS']);
-        values.push(jsonSheet[i]['IOS']);
-        values.push(jsonSheet[i]['ISS']);
-        values.push(jsonSheet[i]['IPS']);
-        values.push(jsonSheet[i]['ICS']);
-        values.push(jsonSheet[i]['MSD']);
+        values.push(jsonSheet[i]["MIM"]);
+        values.push(jsonSheet[i]["TS"]);
+        values.push(jsonSheet[i]["TC"]);
+        values.push(jsonSheet[i]["MS"]);
+        values.push(jsonSheet[i]["AS"]);
+        values.push(jsonSheet[i]["IEX"]);
+        values.push(jsonSheet[i]["I5P"]);
+        values.push(jsonSheet[i]["IMS"]);
+        values.push(jsonSheet[i]["ISN"]);
+        values.push(jsonSheet[i]["I3P"]);
+        values.push(jsonSheet[i]["INS"]);
+        values.push(jsonSheet[i]["IOS"]);
+        values.push(jsonSheet[i]["ISS"]);
+        values.push(jsonSheet[i]["IPS"]);
+        values.push(jsonSheet[i]["ICS"]);
+        values.push(jsonSheet[i]["MSD"]);
 
         returnObject[i] = values;
       }
 
       resolve(returnObject);
     } catch (e) {
-
       reject(e);
     }
   });
@@ -108,8 +108,7 @@ const getAllignmentData = async dir => {
 
 const getAlligmentInfo = async dir => {
   return new Promise((resolve, reject) => {
-    try{
-
+    try {
       let fileInterface = readline.createInterface({
         input: fs.createReadStream(dir + "/align.log")
       });
@@ -117,16 +116,15 @@ const getAlligmentInfo = async dir => {
       let returnLogInfo = {};
       let numLine = 0;
       fileInterface.on("line", line => {
-        numLine ++ ;
+        numLine++;
         //saving from the 97th line
-        if(numLine > 97)
-          returnLogInfo[numLine - 97] =  line.split("=")[1]
+        if (numLine > 97) returnLogInfo[numLine - 97] = line.split("=")[1];
       });
 
       fileInterface.on("close", () => {
         resolve(returnLogInfo);
       });
-    }catch(err){
+    } catch (err) {
       reject(err);
     }
   });
