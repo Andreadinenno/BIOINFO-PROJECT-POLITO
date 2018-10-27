@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Bar, Line, Pie } from "react-chartjs-2";
 import { Menu, Header, Button, Table } from "semantic-ui-react";
+import * as jsPDF from 'jspdf'
 
 class OutputVisualization extends Component {
   constructor(props) {
@@ -24,7 +25,7 @@ class OutputVisualization extends Component {
         ],
         datasets: [
           {
-            label: "# of miRNA",
+            label: "# isomir", //mimato
             data: [0, 0, 0, 0, 0],
             backgroundColor: [
               "rgba(255, 99, 132, 0.8)",
@@ -57,6 +58,7 @@ class OutputVisualization extends Component {
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.downloadPDF = this.downloadPDF.bind(this);
 
     console.log(this.state.chartOutput);
   }
@@ -77,58 +79,88 @@ class OutputVisualization extends Component {
   handleSubmit(event) {
 
     var id = this.state.singleMIMATO;
+    var array = id.split(",");
+
+
+    if(array.length === 1){
+
     //IEX, I5P, IMS, ISN, I3P
-    //{isomiRType: [number, tagCount]}
-    let chartData = { ...this.state.chartData};
+      let chartData = { ...this.state.chartData};
 
-    chartData.datasets[0].data = [0,0,0,0,0]; //values
-    chartData.datasets[1].data = [0,0,0,0,0]; //tag
-    var isMimato = false;
-    this.setState({error: ""});
+      chartData.datasets[0].data = [0,0,0,0,0]; //values
+      chartData.datasets[1].data = [0,0,0,0,0]; //tag
+      var isMimato = false;
+      this.setState({error: ""});
 
-    for (let [key, value] of Object.entries(this.state.chartOutput)) {
-      if(value[0] === id){
-        isMimato = true;
-        //exact
-        if(value[5] === "T"){
+      for (let [key, value] of Object.entries(this.state.chartOutput)) {
+        if(value[0] === id){
+          isMimato = true;
+          //exact
+          if(value[5] === "T"){
 
-          chartData.datasets[0].data[0] ++;
-          chartData.datasets[1].data[0] += value[2];
-        }
-        else{
-          //isomir 5p
-          if(value[6] != 0){
-            chartData.datasets[0].data[1] ++;
-            chartData.datasets[1].data[1] += value[2];
+            chartData.datasets[0].data[0] ++;
+            chartData.datasets[1].data[0] += value[2];
           }
-          //isomir multiple mismatch
-          if(value[7] === "T"){
-            chartData.datasets[0].data[2] ++;
-            chartData.datasets[1].data[2] += value[2];
-          }
-          //isomir single mismatch
-          if(value[8] === "T"){
-            chartData.datasets[0].data[3] ++;
-            chartData.datasets[1].data[3] += value[2];
-          }
-          //isomir 3p
-          if(value[9] != 0){
-            chartData.datasets[0].data[4] ++;
-            chartData.datasets[1].data[4] += value[2];
+          else{
+            //isomir 5p
+            if(value[6] != 0){
+              chartData.datasets[0].data[1] ++;
+              chartData.datasets[1].data[1] += value[2];
+            }
+            //isomir multiple mismatch
+            if(value[7] === "T"){
+              chartData.datasets[0].data[2] ++;
+              chartData.datasets[1].data[2] += value[2];
+            }
+            //isomir single mismatch
+            if(value[8] === "T"){
+              chartData.datasets[0].data[3] ++;
+              chartData.datasets[1].data[3] += value[2];
+            }
+            //isomir 3p
+            if(value[9] != 0){
+              chartData.datasets[0].data[4] ++;
+              chartData.datasets[1].data[4] += value[2];
+            }
           }
         }
       }
-    }
 
-    if(isMimato){
-      this.setState({ chartData });
-      this.setState({showPlot: true});
-    }
-    else{
-      this.setState({error: "This id doesn't match"});
+      if(isMimato){
+        this.setState({ chartData });
+        this.setState({showPlot: true});
+      }
+      else{
+        this.setState({error: "This id doesn't match"});
+      }
+    } else {
+      for(var i=0; i<array.length; i++){
+        var id = array[i]; //MIMATO
+
+        let chartData = { ...this.state.chartData};
+
+        chartData.datasets[0].data = [0,0,0,0,0]; //values
+        chartData.datasets[1].data = [0,0,0,0,0]; //tag
+
+
+
+      }
     }
 
     event.preventDefault();
+  }
+
+  downloadPDF(event){
+    event.preventDefault();
+    var canvas = document.querySelector('#plot_1');
+  	//creates image
+  	var canvasImg = canvas.toDataURL("image/png", 1.0);
+
+  	//creates PDF from img
+  	var doc = new jsPDF('landscape');
+  	doc.setFontSize(25);
+  	doc.addImage(canvasImg, 'PNG', 10, 10, 280, 150 );
+  	doc.save('canvas.pdf');
   }
 
   renderMenu() {
@@ -196,13 +228,17 @@ class OutputVisualization extends Component {
                   type="text"
                   onChange={this.handleChange}
                 />
-              <Button
+              <Button color="teal" size="medium" primary
                 type="Submit"
                 value="Submit"
               >Plot</Button>
+              <Button color="teal" size="medium" primary
+                onClick = {this.downloadPDF}
+              >Download as PDF</Button>
             </form>
 
           <Bar
+            id="plot_1"
             data={this.state.chartData}
             options={{
               title: {
@@ -260,7 +296,7 @@ class OutputVisualization extends Component {
                   type="text"
                   onChange={this.handleChange}
                 />
-              <Button
+              <Button color="teal" size="medium" primary
                 type="Submit"
                 value="Submit"
               >Plot</Button>

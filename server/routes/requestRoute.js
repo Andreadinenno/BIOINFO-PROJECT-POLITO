@@ -23,19 +23,12 @@ module.exports = app => {
   app.post("/api/request", upload.any(), async function(req, res) {
     console.log(req.body);
 
-    //run script
-    /*try{
-      data = await script.startScript(req.body);
-      //console.log(data);
-      res.send(data);
-    }catch(err){
-      res.send(err);
-    }*/
+    //run asynchronous script with error handling
     try{
       data = await script.startScript(req.body);
       res.send(data);
-    } catch(err){
-      res.status(404).send("Oh uh, something went wrong");
+    } catch(error){
+      res.status(500).send(error.message);
     }
 
   });

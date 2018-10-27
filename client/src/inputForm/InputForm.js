@@ -113,8 +113,9 @@ class InputForm extends Component {
           this.setState({ submitted: false, outputData: result, showOutput: true });
 
         })
-        .catch(err => {
-          this.setState({ submitted: false, response: err.message });
+        .catch(error => {
+          //stop the computation and display error message
+          this.setState({ submitted: false, response: error.response.data });
         });
     }
     event.preventDefault();
