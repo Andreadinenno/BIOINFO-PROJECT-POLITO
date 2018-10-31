@@ -21,12 +21,19 @@ class OutputVisualization extends Component {
           "Iso5p",
           "Multiple Mismatch",
           "Single Mismatch",
-          "Iso3p"
+          "Iso3p",
+          "Iso5p-Iso3p-Snp"
+          "Iso5p-Iso3p-MultiSnp"
+          "Iso5p-MultiSnp"
+          "Iso5p-Snp"
+          "Iso5p-Iso3p"
+          "Iso3p-MultiSnp"
+          "Iso3p-Snp"
         ],
         datasets: [
           {
             label: "# isomir", //mimato
-            data: [0, 0, 0, 0, 0],
+            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             backgroundColor: [
               "rgba(255, 99, 132, 0.8)",
               "rgba(54, 162, 235, 0.8)",
@@ -34,7 +41,13 @@ class OutputVisualization extends Component {
               "rgba(75, 192, 192, 0.8)",
               "rgba(153, 102, 255, 0.8)",
               "rgba(255, 159, 64, 0.8)",
-              "rgba(255, 99, 132, 0.8)"
+              "rgba(255, 99, 132, 0.8)",
+              "rgba(54, 162, 235, 0.8)",
+              "rgba(255, 206, 86, 0.8)",
+              "rgba(75, 192, 192, 0.8)",
+              "rgba(153, 102, 255, 0.8)",
+              "rgba(255, 159, 64, 0.8)",
+
             ],
             borderWidth: 1,
             borderColor: "#777",
@@ -45,7 +58,7 @@ class OutputVisualization extends Component {
           {
             type: "line",
             label: "Tag Count",
-            data: [0, 0, 0, 0, 0, 0],
+            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             yAxisID: "r",
             borderWidth: 1,
             borderColor: "#000",
@@ -87,14 +100,18 @@ class OutputVisualization extends Component {
     //IEX, I5P, IMS, ISN, I3P
       let chartData = { ...this.state.chartData};
 
-      chartData.datasets[0].data = [0,0,0,0,0]; //values
-      chartData.datasets[1].data = [0,0,0,0,0]; //tag
+      chartData.datasets[0].data = [0,0,0,0,0,0,0,0,0,0,0,0]; //values
+      chartData.datasets[1].data = [0,0,0,0,0,0,0,0,0,0,0,0]; //tag
       var isMimato = false;
+      var countTotal = 0;
       this.setState({error: ""});
 
       for (let [key, value] of Object.entries(this.state.chartOutput)) {
         if(value[0] === id){
           isMimato = true;
+          countTotal++;
+
+
           //exact
           if(value[5] === "T"){
 
@@ -102,28 +119,71 @@ class OutputVisualization extends Component {
             chartData.datasets[1].data[0] += value[2];
           }
           else{
+            //value[6] = 5p, value[7] = multisnp, value[8] = snp, value[9] = 3p
+
             //isomir 5p
-            if(value[6] != 0){
+            if(value[6] != 0 && value[7] === 'F' && value[8] === 'F' && value[9] === 0){
               chartData.datasets[0].data[1] ++;
               chartData.datasets[1].data[1] += value[2];
             }
             //isomir multiple mismatch
-            if(value[7] === "T"){
+            if(value[6] === 0 && value[7] == 'T' && value[8] === 'F' && value[9] === 0){
               chartData.datasets[0].data[2] ++;
               chartData.datasets[1].data[2] += value[2];
             }
             //isomir single mismatch
-            if(value[8] === "T"){
+            if(value[6] === 0 && value[7] == 'F' && value[8] === 'T' && value[9] === 0){
               chartData.datasets[0].data[3] ++;
               chartData.datasets[1].data[3] += value[2];
             }
             //isomir 3p
-            if(value[9] != 0){
+            if(value[6] === 0 && value[7] == 'F' && value[8] === 'F' && value[9] != 0){{
               chartData.datasets[0].data[4] ++;
               chartData.datasets[1].data[4] += value[2];
             }
+            //Iso5p-Iso3p-Snp
+            if(value[6] != 0 && value[7] == 'F' && value[8] === 'T' && value[9] != 0){{
+              chartData.datasets[0].data[5] ++;
+              chartData.datasets[1].data[5] += value[2];
+            }
+            //Iso5p-Iso3p-MultiSnp
+            if(value[6] != 0 && value[7] == 'T' && value[8] === 'F' && value[9] != 0){{
+              chartData.datasets[0].data[6] ++;
+              chartData.datasets[1].data[6] += value[2];
+            }
+            //Iso5p-MultiSnp
+            if(value[6] != 0 && value[7] == 'T' && value[8] === 'F' && value[9] === 0){{
+              chartData.datasets[0].data[7] ++;
+              chartData.datasets[1].data[7] += value[2];
+            }
+            //Iso5p-Snp
+            if(value[6] != 0 && value[7] == 'F' && value[8] === 'T' && value[9] === 0){{
+              chartData.datasets[0].data[8] ++;
+              chartData.datasets[1].data[8] += value[2];
+            }
+            //Iso5p-Iso3p
+            if(value[6] != 0 && value[7] == 'F' && value[8] === 'F' && value[9] != 0){{
+              chartData.datasets[0].data[9] ++;
+              chartData.datasets[1].data[9] += value[2];
+            }
+            //Iso3p-MultiSnp
+            if(value[6] === 0 && value[7] == 'T' && value[8] === 'F' && value[9] != 0){{
+              chartData.datasets[0].data[10] ++;
+              chartData.datasets[1].data[10] += value[2];
+            }
+            //Iso3p-Snp
+            if(value[6] === 0 && value[7] == 'F' && value[8] === 'T' && value[9] != 0){{
+              chartData.datasets[0].data[11] ++;
+              chartData.datasets[1].data[11] += value[2];
+            }
           }
         }
+      }
+
+      //I'm writing the quantity of count in percentage with respect to the total
+      for(let i = 0; i < 12; i++){
+        let percentage = chartData.datasets[0].data[i] * 100 / countTotal;
+        chartData.datasets[0].data[i] = percentage;
       }
 
       if(isMimato){
