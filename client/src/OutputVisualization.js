@@ -81,6 +81,8 @@ class OutputVisualization extends Component {
     var id = this.state.singleMIMATO;
     var array = id.split(",");
 
+    console.log(array);
+    console.log(id);
 
     if(array.length === 1){
 
@@ -183,6 +185,7 @@ class OutputVisualization extends Component {
   }
 
   renderLogTable(){
+  
     return this.logMessages.map( (message, index) => {
       return(
       <Table.Row>
