@@ -1,3 +1,9 @@
+//AGGIUNTA DEI VARI DATASET
+//MODIFICA DI HANDLEevent con ciclo for che crea tutti i dataset
+//AGGIUNTA DI STACKED = TRUE IN X_AXES
+
+
+
 import React, { Component } from "react";
 import { Bar, Line, Pie } from "react-chartjs-2";
 import { Menu, Header, Button, Table } from "semantic-ui-react";
@@ -8,7 +14,7 @@ class OutputVisualization extends Component {
     super(props); //proprietà passate ai componenti
 
     this.state = {
-      //1: [MIM, TS, TC, MS, AS, IEX, I5P, IMS, ISN, I3P, INS, IOS, ISS, IPS, ICS, MSD],
+      //1: [MIM, TS, TC, MS, AS, IEX, I5P, IMS, ISN, I3P, INS, IOS, ISS, IPS, ICS, MSD, MIM],
       activeItem: "Statistics",
       logOutput: this.props.data.data.log,
       showPlot: false,
@@ -21,31 +27,20 @@ class OutputVisualization extends Component {
           "Iso5p",
           "Multiple Mismatch",
           "Single Mismatch",
-          "Iso3p"
+          "Iso3p",
+          "Iso5p-Iso3p-Snp",
+          "Iso5p-Iso3p-MultiSnp",
+          "Iso5p-MultiSnp",
+          "Iso5p-Snp",
+          "Iso5p-Iso3p",
+          "Iso3p-MultiSnp",
+          "Iso3p-Snp"
         ],
         datasets: [
           {
-            label: "# isomir", //mimato
-            data: [0, 0, 0, 0, 0],
-            backgroundColor: [
-              "rgba(255, 99, 132, 0.8)",
-              "rgba(54, 162, 235, 0.8)",
-              "rgba(255, 206, 86, 0.8)",
-              "rgba(75, 192, 192, 0.8)",
-              "rgba(153, 102, 255, 0.8)",
-              "rgba(255, 159, 64, 0.8)",
-              "rgba(255, 99, 132, 0.8)"
-            ],
-            borderWidth: 1,
-            borderColor: "#777",
-            hoverBorderWidth: 3,
-            hoverBorderColor: "#000",
-            yAxisID: "l"
-          },
-          {
             type: "line",
             label: "Tag Count",
-            data: [0, 0, 0, 0, 0, 0],
+            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             yAxisID: "r",
             borderWidth: 1,
             borderColor: "#000",
@@ -59,9 +54,49 @@ class OutputVisualization extends Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.downloadPDF = this.downloadPDF.bind(this);
-
-    console.log(this.state.chartOutput);
   }
+
+  //new mimato empty object
+  Mimato(label, numMimato){
+    return {
+      label:label, //mimato
+      data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      backgroundColor: this.setColour(numMimato),
+      borderWidth: 1,
+      borderColor: "#777",
+      hoverBorderWidth: 3,
+      hoverBorderColor: "#000",
+      yAxisID: "l"
+    }
+  }
+
+  setColour(numMimato){
+
+    var setOfColour = [];
+
+    if(numMimato > 1){
+  		var r = (Math.random() * 255) + 1;
+  		var g = (Math.random() * 255) + 1;
+  		var b = (Math.random() * 255) + 1;
+
+  		var str = "rgba(" + r.toFixed(0) + "," + g.toFixed(0) + "," + b.toFixed(0) + ", 1)";
+
+      for(let i=0; i<12; i++)
+  		   setOfColour.push(str);
+    }
+    else{
+      for(let i=0; i<12; i++){
+        var r = (Math.random() * 255) + 1;
+    		var g = (Math.random() * 255) + 1;
+    		var b = (Math.random() * 255) + 1;
+
+    		var str = "rgba(" + r.toFixed(0) + "," + g.toFixed(0) + "," + b.toFixed(0) + ", 1)";
+        setOfColour.push(str);
+      }
+    }
+
+      return setOfColour;
+  	}
 
   logMessages = ["Load time of input files (Sec)", "Tags used for IsomiR-SEA alignment", "Tags discarded", "IsomiR-SEA alignment Time (Sec)", "Num Total Tag Seqs", "Num Total Reads Seqs", "Num Align Tag Seqs", "Num Align Mir Seqs", "Num Align Mir Seqs", "Num Align discarded Tag Seqs", "Num Align discarded Tag on PreMir Seqs", "Total Time (Sec)"];
 
@@ -80,72 +115,127 @@ class OutputVisualization extends Component {
 
     var id = this.state.singleMIMATO;
     var array = id.split(",");
+    console.log("\narray :" + array);
+    var numOfMimat = array.length;
+    let chartData = { ...this.state.chartData};
 
+    //re-empty the datasets by keeping only the tag count object
+    //but i need also to empty the tags
+    var tagCount = chartData.datasets[0];
+    tagCount.data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    chartData.datasets = [];
+    chartData.datasets.push(tagCount);
 
-    if(array.length === 1){
+    var isMimato = false;
+    var missingMimato = [];
+    this.setState({error: ""});
 
-    //IEX, I5P, IMS, ISN, I3P
-      let chartData = { ...this.state.chartData};
+    for(let i = 0; i < numOfMimat; i++){
+      var thisMimatoMatched = false;
+      var countTotal = 0;
+      //qua accedo a t e in piu devo andare a scrivere chartData.datasets[i].label = array[i]
+      //cioè passo nome del mimato alla label, l'indice del tag count invece è 10 cioè l'ultimo campo del dataset
 
-      chartData.datasets[0].data = [0,0,0,0,0]; //values
-      chartData.datasets[1].data = [0,0,0,0,0]; //tag
-      var isMimato = false;
-      this.setState({error: ""});
+      //create a new chart object for a new stack pass the label as value
+      var newMimato = this.Mimato(array[i].trim(), numOfMimat);
 
+      //
       for (let [key, value] of Object.entries(this.state.chartOutput)) {
-        if(value[0] === id){
-          isMimato = true;
+        if(value[0] === array[i].trim() || value[16].split(" ")[0].substr(4) === array[i].trim()){
+          isMimato = true; //i found a match so i'm drawing a chart
+          thisMimatoMatched = true;
+          countTotal++;
           //exact
           if(value[5] === "T"){
-
-            chartData.datasets[0].data[0] ++;
-            chartData.datasets[1].data[0] += value[2];
+            newMimato.data[0] ++;
+            chartData.datasets[0].data[0] += value[2];
           }
           else{
+
             //isomir 5p
-            if(value[6] != 0){
-              chartData.datasets[0].data[1] ++;
-              chartData.datasets[1].data[1] += value[2];
+            if(value[6] !==0 && value[7] === 'F' && value[8] === 'F' && value[9] === 0){
+              newMimato.data[1] ++;
+              chartData.datasets[0].data[1] += value[2];
             }
             //isomir multiple mismatch
-            if(value[7] === "T"){
-              chartData.datasets[0].data[2] ++;
-              chartData.datasets[1].data[2] += value[2];
+            if(value[6] === 0 && value[7] === 'T' && value[8] === 'F' && value[9] === 0){
+              newMimato.data[2] ++;
+              chartData.datasets[0].data[2] += value[2];
             }
             //isomir single mismatch
-            if(value[8] === "T"){
-              chartData.datasets[0].data[3] ++;
-              chartData.datasets[1].data[3] += value[2];
+            if(value[6] === 0 && value[7]==='F' && value[8] === 'T' && value[9] === 0){
+              newMimato.data[3] ++;
+              chartData.datasets[0].data[3] += value[2];
             }
             //isomir 3p
-            if(value[9] != 0){
-              chartData.datasets[0].data[4] ++;
-              chartData.datasets[1].data[4] += value[2];
+            if(value[6] === 0 && value[7]==='F' && value[8] === 'F' && value[9] !==0){
+              newMimato.data[4] ++;
+              chartData.datasets[0].data[4] += value[2];
+            }
+            //Iso5p-Iso3p-Snp
+            if(value[6] !==0 && value[7]==='F' && value[8] === 'T' && value[9] !==0){
+              newMimato.data[5] ++;
+              chartData.datasets[0].data[5] += value[2];
+            }
+            //Iso5p-Iso3p-MultiSnp
+            if(value[6] !==0 && value[7]==='T' && value[8] === 'F' && value[9] !==0){
+              newMimato.data[6] ++;
+              chartData.datasets[0].data[6] += value[2];
+            }
+            //Iso5p-MultiSnp
+            if(value[6] !==0 && value[7]==='T' && value[8] === 'F' && value[9] === 0){
+              newMimato.data[7] ++;
+              chartData.datasets[0].data[7] += value[2];
+            }
+            //Iso5p-Snp
+            if(value[6] !==0 && value[7]==='F' && value[8] === 'T' && value[9] === 0){
+              newMimato.data[8] ++;
+              chartData.datasets[0].data[8] += value[2];
+            }
+            //Iso5p-Iso3p
+            if(value[6] !==0 && value[7]==='F' && value[8] === 'F' && value[9] !==0){
+              newMimato.data[9] ++;
+              chartData.datasets[0].data[9] += value[2];
+            }
+            //Iso3p-MultiSnp
+            if(value[6] === 0 && value[7]==='T' && value[8] === 'F' && value[9] !==0){
+              newMimato.data[10] ++;
+              chartData.datasets[0].data[10] += value[2];
+            }
+            //Iso3p-Snp
+            if(value[6] === 0 && value[7]==='F' && value[8] === 'T' && value[9] !==0){
+              newMimato.data[11] ++;
+              chartData.datasets[0].data[11] += value[2];
             }
           }
         }
       }
 
-      if(isMimato){
-        this.setState({ chartData });
-        this.setState({showPlot: true});
+      //I'm converting the quantity of counts in percentage with respect to the total
+      for(let k = 0; k < 12; k++){
+
+        let percentage = (newMimato.data[k] * 100 / countTotal).toFixed(2);
+        newMimato.data[k] = percentage;
+      }
+
+      //push the mimato only if matched
+      if(thisMimatoMatched){
+        chartData.datasets.push(newMimato);
       }
       else{
-        this.setState({error: "This id doesn't match"});
-      }
-    } else {
-      for(var i=0; i<array.length; i++){
-        var id = array[i]; //MIMATO
-
-        let chartData = { ...this.state.chartData};
-
-        chartData.datasets[0].data = [0,0,0,0,0]; //values
-        chartData.datasets[1].data = [0,0,0,0,0]; //tag
-
-
-
+        missingMimato.push(newMimato.label);
       }
     }
+
+    if(isMimato){
+      this.setState({chartData, showPlot: true });
+    }
+    if(missingMimato.length > 0){
+      var error = "List of unmatched MIMATO: " + missingMimato;
+      this.setState({error});
+    }
+
+
 
     event.preventDefault();
   }
@@ -221,8 +311,8 @@ class OutputVisualization extends Component {
         return (
         <div style={{ padding: "10px", marginTop: "20px" }} key="container">
           {this.renderMenu()}
-          <h5 style={ {fontColor: "red"} }>{this.state.error}</h5>
-          <h5>Insert miRNA ID (ex MIMAT0000070)</h5>
+          <h5 style={ {color: "red"} }>{this.state.error}</h5>
+          <h5>Insert one or multiple miRNAID, divided by ' , ' (ex MIMAT0000070 or miR-17-5p)</h5>
             <form onSubmit={this.handleSubmit}>
                 <input
                   type="text"
@@ -259,17 +349,20 @@ class OutputVisualization extends Component {
                   {
                     id: "l",
                     position: "left",
+                    type: "linear",
+                    stacked : true,
                     scaleLabel: {
                       labelString: "# of miRNA",
                       display: true,
                       fontColor: "#000",
                       fontSize: 15,
-                      padding: 20 //distanza dall'asse
+                      padding: 20, //distanza dall'asse
                     }
                   },
                   {
                     id: "r",
                     position: "right",
+                    type: "linear",
                     scaleLabel: {
                       labelString: "Tag Count",
                       display: true,
@@ -278,7 +371,11 @@ class OutputVisualization extends Component {
                       padding: 20
                     }
                   }
-                ]
+                ],
+                xAxes: [{
+                    		stacked : true,
+
+                    	}]
               }
             }}
           />
@@ -290,7 +387,7 @@ class OutputVisualization extends Component {
         <div style={{ padding: "10px", marginTop: "20px" }} key="container">
           {this.renderMenu()}
           <h5 style={ {fontColor: "red"} }>{this.state.error}</h5>
-          <h5>Insert miRNA ID (ex MIMAT0000070)</h5>
+          <h5>Insert one or multiple miRNAID, divided by ' , ' (ex MIMAT0000070 or miR-17-5p)</h5>
             <form onSubmit={this.handleSubmit}>
                 <input
                   type="text"

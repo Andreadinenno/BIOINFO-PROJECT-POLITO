@@ -19,20 +19,24 @@ const startScript = async options => {
     //the output directory is generated from the tag file name without the .txt
     let outputDir = root +  "/" + options['ift'].slice(0, -4);
 
-    //run isomir sea - asynchronous operation
-    child = exec(cmd, {cwd: root}, async (error, stdout, stderr) => {
-      if (error !== null) {
-        reject(new Error("Error executing isoMIR-SEA, please double check your inputs and try again"));
-        deleteFolderRecursive(outputDir);
-      }
+    try{
+      //run isomir sea - asynchronous operation
+      child = exec(cmd, {cwd: root}, async (error, stdout, stderr) => {
+        /*if (error !== null) {
+          reject(new Error("Error executing isoMIR-SA, please double check your inputs and try again"));
+        }*/
 
-      try{
-        data = await processData(outputDir);
-        resolve(data);
-      } catch (err){
-        reject(new Error("Error executing isoMIR-SEA, please double check your inputs and try again"));
-      }
-    });
+        try{
+          data = await processData(outputDir);
+          resolve(data);
+        } catch (err){
+          reject(new Error("Error executing isoMIR-SEA, please double check your inputs and try again"));
+        }
+      });
+
+    }catch(err){
+      reject(new Error("Error executing isoMIR-SEA, please double check your inputs and try again"));
+    }
   });
 };
 
@@ -84,7 +88,7 @@ const getAllignmentData = async dir => {
         values.push(jsonSheet[i]['IPS']);
         values.push(jsonSheet[i]['ICS']);
         values.push(jsonSheet[i]['MSD']);
-
+        values.push(jsonSheet[i]['MIN']);
         returnObject[i] = values;
       }
 
