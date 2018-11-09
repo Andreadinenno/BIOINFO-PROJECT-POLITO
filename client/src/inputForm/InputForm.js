@@ -94,6 +94,7 @@ class InputForm extends Component {
 
       //append the flag user has set
       for (var key in this.state.form) {
+        if ( this.state.form[key] !== '')
         formData.append(key, this.state.form[key]);
       }
 
@@ -129,6 +130,7 @@ class InputForm extends Component {
 
   /* CHANGE HANDLERS */
   checkboxChanged(id, event) {
+  
     let form = { ...this.state.form };
     form[id] = !form[id]; //updating value
     this.setState({ form });
@@ -136,7 +138,8 @@ class InputForm extends Component {
 
   textFieldChanged(id, event) {
     let form = { ...this.state.form };
-    form[event.id] = event.value; //updating value
+    //event.value !== '' ? form[event.id] = event.value : form[event.id] = 0; //updating value
+    form[event.id] = event.value
     this.setState({ form });
   }
 
