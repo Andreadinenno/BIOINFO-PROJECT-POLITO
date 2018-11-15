@@ -1,13 +1,10 @@
-//AGGIUNTA DEI VARI DATASET
-//MODIFICA DI HANDLEevent con ciclo for che crea tutti i dataset
-//AGGIUNTA DI STACKED = TRUE IN X_AXES
-
-
-
 import React, { Component } from "react";
 import { Bar, Line, Pie } from "react-chartjs-2";
-import { Menu, Header, Button, Table } from "semantic-ui-react";
-import * as jsPDF from 'jspdf'
+import { Menu, Header, Button, Table, Dropdown } from "semantic-ui-react";
+import * as jsPDF from 'jspdf';
+import JSZip from "jszip";
+import saveAs from 'file-saver';
+import axios from "axios";
 
 class OutputVisualization extends Component {
   constructor(props) {
@@ -16,6 +13,8 @@ class OutputVisualization extends Component {
     this.state = {
       //1: [MIM, TS, TC, MS, AS, IEX, I5P, IMS, ISN, I3P, INS, IOS, ISS, IPS, ICS, MSD, MIM],
       activeItem: "Statistics",
+      downloadId: this.props.tagFile,
+      speciesName: "",
       logOutput: this.props.data.data.log,
       showPlot: false,
       chartOutput: this.props.data.data.alig,
@@ -54,7 +53,11 @@ class OutputVisualization extends Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.downloadPDF = this.downloadPDF.bind(this);
+    this.downloadOutputFiles = this.downloadOutputFiles.bind(this);
+    this.renderDownloadButtons = this.renderDownloadButtons.bind(this);
   }
+
+  logMessages = ["Load time of input files (Sec)", "Tags used for IsomiR-SEA alignment", "Tags discarded", "IsomiR-SEA alignment Time (Sec)", "Num Total Tag Seqs", "Num Total Reads Seqs", "Num Align Tag Seqs", "Num Align Mir Seqs", "Dynamic Programming on PremiR alignment Time (Sec)", "Num Align discarded Tag Seqs", "Num Align discarded Tag on PreMir Seqs", "Total Time (Sec)"];
 
   //new mimato empty object
   Mimato(label, numMimato){
@@ -74,7 +77,6 @@ class OutputVisualization extends Component {
 
     var setOfColour = [];
 
-    if(numMimato > 1){
   		var r = (Math.random() * 255) + 1;
   		var g = (Math.random() * 255) + 1;
   		var b = (Math.random() * 255) + 1;
@@ -83,22 +85,10 @@ class OutputVisualization extends Component {
 
       for(let i=0; i<12; i++)
   		   setOfColour.push(str);
-    }
-    else{
-      for(let i=0; i<12; i++){
-        var r = (Math.random() * 255) + 1;
-    		var g = (Math.random() * 255) + 1;
-    		var b = (Math.random() * 255) + 1;
-
-    		var str = "rgba(" + r.toFixed(0) + "," + g.toFixed(0) + "," + b.toFixed(0) + ", 1)";
-        setOfColour.push(str);
-      }
-    }
 
       return setOfColour;
   	}
 
-  logMessages = ["Load time of input files (Sec)", "Tags used for IsomiR-SEA alignment", "Tags discarded", "IsomiR-SEA alignment Time (Sec)", "Num Total Tag Seqs", "Num Total Reads Seqs", "Num Align Tag Seqs", "Num Align Mir Seqs", "Num Align Mir Seqs", "Num Align discarded Tag Seqs", "Num Align discarded Tag on PreMir Seqs", "Total Time (Sec)"];
 
   //handle the tab click
   handleItemClick(clickedItem, event) {
@@ -139,12 +129,16 @@ class OutputVisualization extends Component {
       //create a new chart object for a new stack pass the label as value
       var newMimato = this.Mimato(array[i].trim(), numOfMimat);
 
-      //
       for (let [key, value] of Object.entries(this.state.chartOutput)) {
         if(value[0] === array[i].trim() || value[16].split(" ")[0].substr(4) === array[i].trim()){
           isMimato = true; //i found a match so i'm drawing a chart
           thisMimatoMatched = true;
           countTotal++;
+
+
+          var spName = value[16].split(" ")[2] + " " + value[16].split(" ")[3];
+          this.setState({speciesName : spName});
+
           //exact
           if(value[5] === "T"){
             newMimato.data[0] ++;
@@ -231,9 +225,10 @@ class OutputVisualization extends Component {
       this.setState({chartData, showPlot: true });
     }
     if(missingMimato.length > 0){
-      var error = "List of unmatched MIMATO: " + missingMimato;
+      var error = "List of unmatched inputs: " + missingMimato;
       this.setState({error});
     }
+
 
 
 
@@ -253,6 +248,46 @@ class OutputVisualization extends Component {
   	doc.save('canvas.pdf');
   }
 
+  downloadOutputFiles(filename, event){
+
+    axios
+      .get("/api/download/",{
+          params: {
+            id: this.state.downloadId,
+            file: filename
+          }
+        })
+      .then(result => {
+
+        //pipe the stream into the files
+        var blob = new Blob([result.data],{type : 'text/plain'});
+        var file = new File([blob], filename, {type: 'text/plain'});
+        saveAs(file, filename);
+
+      })
+      .catch(error => {
+        console.log(error);
+      });
+
+    event.preventDefault();
+  }
+
+  renderDownloadButtons(){
+    return(
+      <Button.Group color='teal'>
+        <Button>Download Output File</Button>
+        <Dropdown floating button className='icon'>
+          <Dropdown.Menu>
+            <Dropdown.Item text='Stats Log' onClick={this.downloadOutputFiles.bind(this,"align.log")}/>
+            <Dropdown.Item text='Tag Mir.gff' onClick={this.downloadOutputFiles.bind(this,"tagMir-all.gff")} />
+            <Dropdown.Item text='Tag Mir.tab' onClick={this.downloadOutputFiles.bind(this,"tagMir-all.tab")}/>
+            <Dropdown.Item text='Tag PreMir.gff' onClick={this.downloadOutputFiles.bind(this,"tagPrxMir-all.gff")}/>
+            <Dropdown.Item text='Tag PreMir.tab' onClick={this.downloadOutputFiles.bind(this,"tagPrxMir-all.tab")}/>
+          </Dropdown.Menu >
+        </Dropdown>
+      </Button.Group>
+    )
+  }
   renderMenu() {
     return (
       <Menu tabular size="large" style={{ marginBottom: "35px" }}>
@@ -311,8 +346,15 @@ class OutputVisualization extends Component {
         return (
         <div style={{ padding: "10px", marginTop: "20px" }} key="container">
           {this.renderMenu()}
-          <h5 style={ {color: "red"} }>{this.state.error}</h5>
-          <h5>Insert one or multiple miRNAID, divided by ' , ' (ex MIMAT0000070 or miR-17-5p)</h5>
+          <Header
+            as="h5"
+            style={{
+              width: "auto",
+              color: "red"
+            }}
+          >{this.state.error}</Header>
+
+          <h5 style={{align: "center"}}>Insert one or multiple miRNAID, divided by ' , ' (ex MIMAT0000070 or miR-17-5p)</h5>
             <form onSubmit={this.handleSubmit}>
                 <input
                   type="text"
@@ -325,6 +367,7 @@ class OutputVisualization extends Component {
               <Button color="teal" size="medium" primary
                 onClick = {this.downloadPDF}
               >Download as PDF</Button>
+              {this.renderDownloadButtons()}
             </form>
 
           <Bar
@@ -333,7 +376,7 @@ class OutputVisualization extends Component {
             options={{
               title: {
                 display: true,
-                text: "Isoforms Distribution",
+                text: "Isoforms Distribution of " + this.state.speciesName,
                 fontSize: 25
               },
               layout: {
@@ -386,7 +429,13 @@ class OutputVisualization extends Component {
         return (
         <div style={{ padding: "10px", marginTop: "20px" }} key="container">
           {this.renderMenu()}
-          <h5 style={ {fontColor: "red"} }>{this.state.error}</h5>
+          <Header
+            as="h5"
+            style={{
+              width: "auto",
+              color: "red"
+            }}
+          >{this.state.error}</Header>
           <h5>Insert one or multiple miRNAID, divided by ' , ' (ex MIMAT0000070 or miR-17-5p)</h5>
             <form onSubmit={this.handleSubmit}>
                 <input
@@ -397,6 +446,7 @@ class OutputVisualization extends Component {
                 type="Submit"
                 value="Submit"
               >Plot</Button>
+              {this.renderDownloadButtons()}
             </form>
           </div>
         );

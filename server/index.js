@@ -9,6 +9,7 @@ const app = express(); //create an express application
 app.use(bodyParser.json()); //body parser for incoming request
 
 require("./routes/requestRoute.js")(app); //will call immediately the route file function passing app as argument
+require('./routes/downloadRoute.js')(app);
 
 if (process.env.NODE_ENV === "production") {
   //express will serve up production assets -> main.js, main.css

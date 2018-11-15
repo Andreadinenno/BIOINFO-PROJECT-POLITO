@@ -47,7 +47,8 @@ const processData = async dir => {
 
       try{
         var alig = await getAllignmentData(dir);
-        deleteFolderRecursive(dir);
+
+        //deleteFolderRecursive(dir);
 
         var returnData= {"log": lines, "alig": alig};
         resolve(returnData);
