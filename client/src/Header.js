@@ -1,5 +1,24 @@
 import React, { Component } from "react";
+import axios from "axios";
+import saveAs from 'file-saver';
 class Header extends Component {
+  downloadDocumentation(event){
+    axios
+      .get("/api/documentation/",  {responseType: 'blob'})
+      .then(result => {
+        var filename = "isoMir-SEA.pdf"
+        //pipe the stream into the files
+        var blob = new Blob([result.data],{type : 'application/octet-stream'});
+        //var file = new File([blob], filename, {type: 'application/pdf'});
+        saveAs(blob, filename);
+
+      })
+      .catch(error => {
+        console.log(error);
+      });
+
+    event.preventDefault();
+  }
   render() {
     return (
       <nav>
@@ -15,7 +34,7 @@ class Header extends Component {
               </a>
             </li>
             <li>
-              <a href="/documents/isomiR-SEA.pdf" download="isomiR-SEA.pdf">
+              <a onClick={this.downloadDocumentation}>
                 Docs<i className="large material-icons right">link</i>
               </a>
             </li>

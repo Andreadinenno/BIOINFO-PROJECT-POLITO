@@ -5,6 +5,25 @@ var Blob = require('blob');
 const streamToBuffer = require('stream-to-buffer');
 
 module.exports = app => {
+
+  //documentation file
+  app.get('/api/documentation', (req, res) => {
+    console.log(req.body);
+
+    var filename = path.join(__dirname, "../docs/isoMir_SEA_web_application.pdf");
+    var stat = fs.statSync(filename);
+
+    res.writeHead(200, {
+      'Content-Type' : 'application/pdf',
+      'Content-Length' : stat.size,
+      'Content-Disposition': 'attachment; filename=isomiR-SEA.pdf'
+    });
+
+    var readStream = fs.createReadStream(filename);
+    readStream.pipe(res);
+  })
+
+  //OUTPUT FILES
   app.get('/api/download/', (req,res) => {
     console.log(req.body);
     //console.log(req.query.id);
