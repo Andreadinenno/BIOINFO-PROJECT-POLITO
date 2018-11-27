@@ -130,7 +130,7 @@ class InputForm extends Component {
 
   /* CHANGE HANDLERS */
   checkboxChanged(id, event) {
-  
+
     let form = { ...this.state.form };
     form[id] = !form[id]; //updating value
     this.setState({ form });
@@ -174,7 +174,7 @@ class InputForm extends Component {
           value={this.state.form[field.id]}
           key={field.id}
           type={field.type}
-          step="0.01"
+          step={field.step}
           onChange={this.textFieldChanged.bind(field.id)}
         />
       );
@@ -403,7 +403,7 @@ class InputForm extends Component {
     } else {
       //render the output visualization with the form passed as props
       //the OutputVisualization component will get the data as props.data
-      return <OutputVisualization data={this.state.outputData} />;
+      return <OutputVisualization data={this.state.outputData} tagFile= {this.state.form.ift}/>;
     }
   }
 }

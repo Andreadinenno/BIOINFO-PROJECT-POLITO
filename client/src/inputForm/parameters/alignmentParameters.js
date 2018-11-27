@@ -19,28 +19,32 @@ export default [
     label: "Gap open cost",
     help: "Gap open cost for the Smith-Waterman alignment",
     id: "go",
-    type: "number"
+    type: "number",
+    step: "0.01"
   },
 
   {
     label: "Gap extend cost",
     help: "Gap extend cost for the Smith-Waterman alignment",
     id: "ge",
-    type: "number"
+    type: "number",
+    step: "0.01"
   },
 
   {
     label: "Match score",
     help: "Score of a match for the Smith-Waterman alignment",
     id: "ma",
-    type: "number"
+    type: "number",
+    step: "0.01"
   },
 
   {
     label: "Mismatch score",
     help: "Score of a mismatch for the Smith-Waterman alignment",
     id: "mm",
-    type: "number"
+    type: "number",
+    step: "0.01"
   },
 
   {
@@ -89,46 +93,55 @@ export default [
     label:
       "Minimum size of ungapped alignment, starting from the seed, extending the alignment",
     id: "msas",
-    type: "number"
+    type: "number",
+    step: "1"
   },
   {
     label: "Minimum alignment score for considering a tag expression of a miRna",
     id: "mas",
-    type: "number"
+    type: "number",
+    step: "1"
   },
   {
     label: "Start position of the seed",
     id: "ss",
-    type: "number"
+    type: "number",
+    step: "1"
   },
   {
     label: "End position of the seed",
     id: "se",
-    type: "number"
+    type: "number",
+    step: "1"
   },
   {
     label: "Max index in tag position for starting the seed alignment",
     id: "mspt",
-    type: "number"
+    type: "number",
+    step: "1"
   },
   {
     label: "Minimum size of tag to be considered for the alignment",
     id: "mst",
-    type: "number"
+    type: "number",
+    step: "1"
   },
   {
     id: "tst",
     label: "Threshold used to select high quality multimapped tags",
-    type: "number"
+    type: "number",
+    step: "1"
   },
   {
     id: "mos",
     label: "Number of mismatches allowed between miRNA and tags",
-    type: "number"
+    type: "number",
+    step: "1"
   },
   {
     id: "mis",
     label: "Number of mismatches allowed between miRNA seed and tags",
-    type: "number"
+    type: "number",
+    step: "1"
   }
 ];
