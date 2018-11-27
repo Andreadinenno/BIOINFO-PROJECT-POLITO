@@ -92,7 +92,7 @@ export default [
     type: "number"
   },
   {
-    label: "Minimum alignment score for considering a tag expression of a miR",
+    label: "Minimum alignment score for considering a tag expression of a miRna",
     id: "mas",
     type: "number"
   },
@@ -118,17 +118,17 @@ export default [
   },
   {
     id: "tst",
-    label: "Threshold used to select select high quality multimapped tags",
+    label: "Threshold used to select high quality multimapped tags",
     type: "number"
   },
   {
     id: "mos",
-    label: "Number of mismatches allowed between miRNA and tags tags",
+    label: "Number of mismatches allowed between miRNA and tags",
     type: "number"
   },
   {
     id: "mis",
-    label: "Number of mismatches allowed between miRNA seed and tags tags",
+    label: "Number of mismatches allowed between miRNA seed and tags",
     type: "number"
   }
 ];
