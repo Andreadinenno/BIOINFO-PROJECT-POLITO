@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { Bar, Line, Pie } from "react-chartjs-2";
 import { Menu, Header, Button, Table, Dropdown } from "semantic-ui-react";
 import * as jsPDF from 'jspdf';
-import JSZip from "jszip";
 import saveAs from 'file-saver';
 import axios from "axios";
 
