@@ -25,9 +25,18 @@ const startScript = async options => {
         /*if (error !== null) {
           reject(new Error("Error executing isoMIR-SA, please double check your inputs and try again"));
         }*/
+        console.log(stdout);
+        console.log(stderr);
 
         try{
           data = await processData(outputDir);
+
+          const fileToDelete = ['ift','ifm'];
+          Object.keys(options).forEach(key => {
+            if (fileToDelete.includes(key))
+              deleteFile (root, options[key]);
+          });
+
           resolve(data);
         } catch (err){
           reject(new Error("Error executing isoMIR-SEA, please double check your inputs and try again"));
@@ -48,7 +57,7 @@ const processData = async dir => {
       try{
         var alig = await getAllignmentData(dir);
 
-        //deleteFolderRecursive(dir);
+        deleteFolderRecursive(dir);
 
         var returnData= {"log": lines, "alig": alig};
         resolve(returnData);
@@ -60,6 +69,15 @@ const processData = async dir => {
       reject(err);
     }
   });
+}
+
+const deleteFile =  (root ,file) => {
+    try{
+      console.log("remove " + root + '/' + file)
+      fs.unlinkSync(root + '/' + file);
+    }catch(e){
+      console.log(e);
+    }
 }
 
 const getAllignmentData = async dir => {
@@ -105,6 +123,7 @@ const getAlligmentInfo = async dir => {
   return new Promise((resolve, reject) => {
     try{
 
+      console.log(dir);
       let fileInterface = readline.createInterface({
         input: fs.createReadStream(dir + "/align.log")
       });
