@@ -3,7 +3,7 @@ import Header from "./Header";
 import Homepage from "./Homepage";
 import OutputVisualization from "./OutputVisualization";
 import InputForm from "./inputForm/InputForm";
-import { Route, BrowserRouter } from "react-router-dom";
+import {Route, BrowserRouter} from "react-router-dom";
 
 class App extends Component {
   render() {
