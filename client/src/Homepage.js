@@ -2,7 +2,7 @@
 import React, { Component } from "react";
 import file from "./README.md";
 import ReactMd from "react-md-file";
-import { Card } from "semantic-ui-react";
+import {Card} from "semantic-ui-react";
 
 class Homepage extends Component {
   render() {
